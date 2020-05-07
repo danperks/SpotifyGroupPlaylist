@@ -19,20 +19,21 @@ app.template_folder = "templates"
 
 @app.route("/SpotifyCallback")
 
-def CallBack():
+def SpotifyCallBack():
     userReturnedCode = request.args["code"]
     if userReturnedCode == "access_denied":
         print("ERROR : User Denies access ")
         return render_template("index.html")
-    AuthToken = GetAuthoristaionToken(userReturnedCode)
-    
+    AuthToken = GetAuthoristaionToken(str(userReturnedCode))
+    RefreshToken = AuthToken["refresh_token"]#tokens expire after one hour
+    print(AuthToken["access_token"])
     return "0"
 
 @app.route("/")#index
 def indexStart():
     return render_template("index.html")
 
-@app.route("/Login/Spotify")
+@app.route("/Login/Spotify") #Create a check to see if user is already registed, if they are then we need to call a refresh token rather than a new one
 def SpotifyLogIn():
     print("connected")
     return redirect(ApplicationVerification())
