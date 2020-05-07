@@ -30,8 +30,11 @@ def GetAuthoristaionToken(AppVerificationToken):
     #print("https://accounts.spotify.com/api/token?"+str(urllib.parse.urlencode(bodyParameters)))
     return requests.post("https://accounts.spotify.com/api/token",bodyParameters).json()
 
+def RefreshAccessToken():
+    return "s"
 
-
+def GetUserID(UserAccessToken):
+    return "s"
 def GetUsersLikedSongs(UserAccessToken):
     return "s"
 
@@ -39,4 +42,7 @@ def GetUsersPlaylists(UserAccessToken):
     return "s"
 
 def GetItemsInPlaylist(UserAccessToken):
+    return "s"
+
+def PushToNewPlaylist(UserAccessToken,ArrayOfSongs):
     return "s"

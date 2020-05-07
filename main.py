@@ -16,7 +16,8 @@ app = Flask(__name__)
 app.static_folder = "static"
 app.template_folder = "templates"
 
-
+#Database
+#Users: GroupID,UserName,SpotifyID,SpotifyRefreshTokenAddress(/equivalents for each service)
 @app.route("/SpotifyCallback")
 
 def SpotifyCallBack():
