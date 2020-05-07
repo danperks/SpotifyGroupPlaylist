@@ -7,13 +7,13 @@ def ApplicationVerification():#https://developer.spotify.com/documentation/gener
     auth_parameters ={
         "client_id":"***REMOVED***",
         "response_type" : "code",
-        "redirect_uri" : "http://127.0.0.1:5000/callback"#ok proof of redirect method to the bbc. cant go wrong.
+        "redirect_uri" : "http://127.0.0.1:5000/SpotifyCallback"#ok proof of redirect method to the bbc. cant go wrong.
     }
     #print("https://accounts.spotify.com/authorize?"+for)
-    print("https://accounts.spotify.com/authorize?"+urllib.parse.urlencode(auth_parameters))
+    return ("https://accounts.spotify.com/authorize?" + str(urllib.parse.urlencode(auth_parameters)))
+    
 
 
 def GetAuthoristaionToken(): 
     #current understanding is on user authorisation i receive a code , i then send this off to /api/token as a post request to get the code proper
-    return 0
-ApplicationVerification()
+    return "0"

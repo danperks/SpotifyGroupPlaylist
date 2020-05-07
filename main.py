@@ -10,14 +10,23 @@ from flask import send_from_directory
 from flask import url_for
 from flask import jsonify
 
-from spotifyMethods import ApplicationVerification
+from spotifyMethods import ApplicationVerification, GetAuthoristaionToken
 
 app = Flask(__name__)
 app.static_folder = "static"
 app.template_folder = "templates"
 
 
-@app.route("/callback")
+@app.route("/SpotifyCallback")
+
+def CallBack():
+    userReturnedCode = request.args["code"]
+    if userReturnedCode == "access_denied":
+        print("ERROR : User Denies access ")
+        return render_template("index.html")
+    AuthToken = GetAuthoristaionToken(userReturnedCode)
+    
+    return "0"
 
 @app.route("/")#index
 def indexStart():
@@ -30,10 +39,10 @@ def SpotifyLogIn():
     
 @app.route("/Login/Apple")
 def AppleLogIn():
-    return 0;
+    return "0";
 @app.route("/Login/Google")
 def GoogleLogin():
-    return 0;
+    return "0";
 
 if __name__ == "__main__":
     debug = True
