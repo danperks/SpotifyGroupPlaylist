@@ -30,3 +30,14 @@ Initally this will be focused on spotify,however i would like to include apple m
 
 
 Will be a mobile site, and then if theres time just wrap it up.
+
+
+Step 1:
+
+Establish Methods for Spotify API
+
+Step 2:
+Database
+
+Step 3 :
+Other Stuff
