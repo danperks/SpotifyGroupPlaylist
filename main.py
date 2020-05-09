@@ -10,7 +10,7 @@ from flask import send_from_directory
 from flask import url_for
 from flask import jsonify
 
-from spotifyMethods import ApplicationVerification, GetAuthoristaionToken
+from spotifyMethods import ApplicationVerification, GetAuthoristaionToken,RefreshAccessToken
 
 app = Flask(__name__)
 app.static_folder = "static"
@@ -27,8 +27,9 @@ def SpotifyCallBack():
         return render_template("index.html")
     AuthToken = GetAuthoristaionToken(str(userReturnedCode))
     RefreshToken = AuthToken["refresh_token"]#tokens expire after one hour
-    print(AuthToken["access_token"])
-    return "0"
+    print("Access Token " + str(AuthToken["access_token"]))
+    print("Refreshed Token " + str(RefreshAccessToken(RefreshToken)))
+    return RefreshAccessToken(RefreshToken)
 
 @app.route("/")#index
 def indexStart():
