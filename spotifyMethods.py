@@ -2,7 +2,7 @@ import requests
 import urllib
 ClientID = "***REMOVED***"
 ClientSecret = "***REMOVED***"
-
+##Thoughts about database - instead of tracking the votes, we can jsut add a "local file " to each database which just has SongName - Vote Count - idk , maybe althouhg would need to think about what is done to stop multiple voting and it is a bodge
 def ApplicationVerification():#https://developer.spotify.com/documentation/general/guides/authorization-guide/
     auth_parameters ={
         "client_id":"***REMOVED***",
@@ -17,7 +17,7 @@ def ApplicationVerification():#https://developer.spotify.com/documentation/gener
 
 def GetAuthoristaionToken(AppVerificationToken): 
     #current understanding is on user authorisation i receive a code , i then send this off to /api/token as a post request to get the code proper
-    print(AppVerificationToken)
+   # print(AppVerificationToken)
     bodyParameters = {
         "grant_type":"authorization_code",
         "code":AppVerificationToken,
@@ -43,10 +43,47 @@ def RefreshAccessToken(RefreshToken):
 #code = "AQCkFA0FSjks0q9WmXlgIhNJWi1TuSrFs7Umw5g9JgZ6_8HaDb6yx1w_sTFt4uwHx0U-tQGuZTB9pywDOarw8pvrPzSvjuk5cZRG3yqprZc_b_0xPqgOLgjE312OE6QLVh8u0ykBZy-0XtirME12sdYNs6O2EeZX2Gl2fIkDfBznDLCD8DL2rC8zeCNA8KeH29htkMNvfVWJu9Q"
 #print(RefreshAccessToken(GetAuthoristaionToken(code)["refresh_token"]))
 def GetUserID(UserAccessToken):
+    headers = {
+    'Authorization': 'Bearer {your access token}',
+    }
+    return requests.get('https://api.spotify.com/v1/me', headers=headers).json()["id"]
 
+
+def IsSongInUserLibrary(ListOfSpotifyID,UserAccessToken):
+    AlreadyPresent = []
+    headers = {
+        "Accept": "application/json",
+        "Content-Type": "application/json",
+        "Authorization":'Bearer '+UserAccessToken
+    }
+    bodyParameters={
+        "ids":ListOfSpotifyID
+    }
+
+    return requests.get("https://api.spotify.com/v1/me/tracks/contains",headers=headers,params=bodyParameters).json()
+    #for every 50ID's
+    #send API Request
+    #if true add song ID to ArrayOfUserApproved
     return "s"
-def GetUsersLikedSongs(UserAccessToken):
-    return "s"
+
+def GetUsersLikedSongs(UserAccessToken):#Pagination - Deprecated
+    LikedSoFar = "";
+    headers = {
+        "Accept": "application/json",
+        "Content-Type": "application/json",
+        "Authorization":'Bearer '+UserAccessToken
+        
+    }
+    bodyParameters={
+        #"Authorization":UserAccessToken,
+        "limit":50
+        #"header":header
+    }
+    return requests.get("https://api.spotify.com/v1/me/tracks",headers=headers,params=bodyParameters).json()
+    for item in requests.get("https://api.spotify.com/v1/me/tracks",headers=headers,params=bodyParameters).json():
+        LikedSoFar = LikedSoFar + str(item["name"])
+    return LikedSoFar
+    
 
 def GetUsersPlaylists(UserAccessToken):
     return "s"
