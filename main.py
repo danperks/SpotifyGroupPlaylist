@@ -46,13 +46,7 @@ def indexStart():
     else:
         print("No Cookie Present")
         return render_template("index.html")   
-    #check cookie to see if spotify authorised
-    #if spotify authorised, then allow user to enter group id
-    #if not, authoirse, then redirect to group id - set refresh token as the cookie
-    
-@app.route("/test")
-def test():
-    return GetUsersLikedSongs("BQCUaytGjGYYwSGIEIbMK53tLdTBJMtO-wM_1aoPbrMH887eMw9luaZ1RqyZEjEoOF6Mb45nKLoQqB4gcB1N3LljW92nSwMTKe7emv9j3LhNY6saiV73VkndUdvPd9YwHOw6U3cwnfKdVEKLFtBnHMY2rgNXY1l36mT5OSPKakHmHtDzgOiX164LXuIbIV6-Bn7sv4NHn2_yFTl5HLkki0FD6pjQOzB6v3EGMmNlTA")
+
 @app.route("/form/EnterCode",methods=["POST"])
 def LoadIntoGroup():
     GroupID = escape(request.form["GroupCode"])
@@ -69,6 +63,8 @@ def AppleLogIn():
 @app.route("/Login/Google")
 def GoogleLogin():
     return "0";
+
+
 @app.errorhandler(404)
 def page_not_found_error(e):
     return render_template("404.html"),404
