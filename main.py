@@ -12,13 +12,13 @@ from flask import url_for
 from flask import jsonify
 from flask import escape
 from spotifyMethods import *
-
+from config import *
 
 
 app = Flask(__name__)
 app.static_folder = "static"
 app.template_folder = "templates"
-conn = psycopg2.connect(host = "***REMOVED***",database = "***REMOVED***",user = "***REMOVED***",password= "***REMOVED***")
+conn = psycopg2.connect(host = DatabaseHost,database = Database,user = DatabaseUser,password= DatabasePassword)
 SQLcursor = conn.cursor()
 ## go environment varible for user and password , will do for now
 #Database

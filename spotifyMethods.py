@@ -1,7 +1,7 @@
 import requests
 import urllib
-ClientID = "***REMOVED***"
-ClientSecret = "***REMOVED***"
+from config import ClientID , ClientSecret
+
 ##Thoughts about database - instead of tracking the votes, we can jsut add a "local file " to each database which just has SongName - Vote Count - idk , maybe althouhg would need to think about what is done to stop multiple voting and it is a bodge
 def ApplicationVerification():#https://developer.spotify.com/documentation/general/guides/authorization-guide/
     auth_parameters ={
