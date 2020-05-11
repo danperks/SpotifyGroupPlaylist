@@ -73,19 +73,19 @@ def page_not_found_error(e):
 
 
 ###### DATABASE METHODS ####
-def DoesGroupExist(GroupID):
-    params = {'g':tuple([GroupID])}
+def DoesGroupExist(GroupId):
+    params = {'g':tuple([GroupId])}
     SQLcursor.execute("SELECT \"GroupId\" from Groups WHERE \"GroupId\" in %(g)s ",params)
     if SQLcursor.rowcount > 0:
         return True
     else:
         return False;
 
-def AddUserToGroup(UserID,GroupID):
+def AddUserToGroup(UserId,GroupId):
     
     return True
 
-def CreateNewGroup(GroupID):
+def CreateNewGroup(UserId,GroupId):
     return True
 
 def AddUserToDatabase(refresh_token):
