@@ -44,7 +44,7 @@ def RefreshAccessToken(RefreshToken):
 #print(RefreshAccessToken(GetAuthoristaionToken(code)["refresh_token"]))
 def GetUserID(UserAccessToken):
     headers = {
-    'Authorization': 'Bearer {your access token}',
+    "Authorization":'Bearer '+UserAccessToken,
     }
     return requests.get('https://api.spotify.com/v1/me', headers=headers).json()["id"]
 
