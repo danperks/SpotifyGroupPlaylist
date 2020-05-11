@@ -86,6 +86,10 @@ def AddUserToGroup(UserId,GroupId):
     return True
 
 def CreateNewGroup(UserId,GroupId):
+    UserID = GetUserID(RefreshAccessToken(refresh_token)["access_token"])
+    params = {'UserID':tuple([UserID]),'Refresh_Token':tuple([refresh_token])}
+    SQLcursor.execute("INSERT INTO public.\"Users\"(\"UserId\", \"RefreshToken\") VALUES (%(UserID)s,%(Refresh_Token)s);",params)
+    conn.commit()
     return True
 
 def AddUserToDatabase(refresh_token):
@@ -94,6 +98,19 @@ def AddUserToDatabase(refresh_token):
     SQLcursor.execute("INSERT INTO public.\"Users\"(\"UserId\", \"RefreshToken\") VALUES (%(UserID)s,%(Refresh_Token)s);",params)
     conn.commit()
     return "s"
+
+### MISC ##
+
+def PlaylistOutput():
+    ##not neccessarily all in this method but the plan
+    ## Get lead user ID(first in Array)
+    ## get refresh token from users table
+    ## obtain access token using above
+    ## create new playlist in that users library
+    ## add neccessary songs to that playlist
+    return "s"
+
+
 if __name__ == "__main__":
     debug = True
     port = int(os.environ.get("PORT",5000))
