@@ -11,8 +11,9 @@ from flask import send_from_directory
 from flask import url_for
 from flask import jsonify
 from flask import escape
+from spotifyMethods import *
 
-from spotifyMethods import ApplicationVerification, GetAuthoristaionToken,RefreshAccessToken,GetUsersLikedSongs
+
 
 app = Flask(__name__)
 app.static_folder = "static"
@@ -23,29 +24,32 @@ SQLcursor = conn.cursor()
 #Database
 @app.route("/SpotifyCallback")
 
-def SpotifyCallBack():
+def SpotifyCallBack(): # Spotify Logins in the user, user redirected to the group entry page
     userReturnedCode = request.args["code"]
     if userReturnedCode == "access_denied":
         print("ERROR : User Denies access ")
         return render_template("index.html")
     AuthToken = GetAuthoristaionToken(str(userReturnedCode))
     RefreshToken = AuthToken["refresh_token"]#tokens expire after one hour
-    resp = make_response(render_template("GroupCodeEntry.html"))
+    resp = make_response(render_template("Login.html"))
     resp.set_cookie("RefreshToken",RefreshToken)
-    #print("Access Token " + str(AuthToken["access_token"]))
-    print("Refreshed Token " + str(RefreshAccessToken(RefreshToken)))
-    #return GetUsersLikedSongs(RefreshAccessToken(RefreshToken)["access_token"])
+    AddUserToDatabase(RefreshToken)
     return resp
-    #return GetUsersLikedSongs("BQBt2vXxSs9m17_2vz9EUlW4f_F27AUl9d34b-_VdO8DM4i4OFZ380JVZj80-bDPi4lweS-_GND8tf48EYfN4QPAI-QdwVWjcVSSlus4NXXuZUrHkhwIkBKGIAzVtUHuhPrizm7acRlBi0bnPwNYcPg_aF2BYmv48P0Lax5eFeRgWiI4taLvMrONC2iVGEWAfGKZFTvBP15zw3UdGc6yKAMhuj4V2p35scV2yPuxXw")
-@app.route("/")#index
+    
+@app.route("/")#index - start page, user asked to either authorise with spotify - or automatic forward to group entry
 def indexStart():
-    if "RefreshToken" in request.cookies:#just check for the token
+    if "RefreshToken" in request.cookies:
+        print(request.cookies)
+        print("Cookie Present")#just check for the token
         PreviousAuthorisation = request.cookies["RefreshToken"]
+        return render_template("Login.html")
+    else:
+        print("No Cookie Present")
+        return render_template("index.html")   
     #check cookie to see if spotify authorised
     #if spotify authorised, then allow user to enter group id
     #if not, authoirse, then redirect to group id - set refresh token as the cookie
     
-    return render_template("index.html")
 @app.route("/test")
 def test():
     return GetUsersLikedSongs("BQCUaytGjGYYwSGIEIbMK53tLdTBJMtO-wM_1aoPbrMH887eMw9luaZ1RqyZEjEoOF6Mb45nKLoQqB4gcB1N3LljW92nSwMTKe7emv9j3LhNY6saiV73VkndUdvPd9YwHOw6U3cwnfKdVEKLFtBnHMY2rgNXY1l36mT5OSPKakHmHtDzgOiX164LXuIbIV6-Bn7sv4NHn2_yFTl5HLkki0FD6pjQOzB6v3EGMmNlTA")
@@ -55,11 +59,9 @@ def LoadIntoGroup():
     if DoesGroupExist(GroupID) == True:
         return "s"
     return "s"
-@app.route("/Login/Spotify") #Create a check to see if user is already registed, if they are then we need to call a refresh token rather than a new one
+@app.route("/SpotifyAuthorise") #Create a check to see if user is already registed, if they are then we need to call a refresh token rather than a new one
 def SpotifyLogIn():
-    return render_template("Login.html")
-    print("connected")
-    #return redirect(ApplicationVerification())
+        return redirect(ApplicationVerification())
     
 @app.route("/Login/Apple")
 def AppleLogIn():
@@ -90,7 +92,12 @@ def AddUserToGroup(UserID,GroupID):
 def CreateNewGroup(GroupID):
     return True
 
-
+def AddUserToDatabase(refresh_token):
+    UserID = GetUserID(RefreshAccessToken(refresh_token)["access_token"])
+    params = {'UserID':tuple([UserID]),'Refresh_Token':tuple([refresh_token])}
+    SQLcursor.execute("INSERT INTO public.\"Users\"(\"UserId\", \"RefreshToken\") VALUES (%(UserID)s,%(Refresh_Token)s);",params)
+    conn.commit()
+    return "s"
 if __name__ == "__main__":
     debug = True
     port = int(os.environ.get("PORT",5000))
