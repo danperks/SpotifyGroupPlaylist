@@ -82,13 +82,17 @@ def DoesGroupExist(GroupId):
         return False;
 
 def AddUserToGroup(UserId,GroupId):
-    
+    #check if group exists
+    #either alter the user array and add the id, or just pull it down unpack, add , and repack with the new one
+    #commit changes
+    #user now in group
     return True
 
 def CreateNewGroup(UserId,GroupId):
-    UserID = GetUserID(RefreshAccessToken(refresh_token)["access_token"])
-    params = {'UserID':tuple([UserID]),'Refresh_Token':tuple([refresh_token])}
-    SQLcursor.execute("INSERT INTO public.\"Users\"(\"UserId\", \"RefreshToken\") VALUES (%(UserID)s,%(Refresh_Token)s);",params)
+    GroupId ="" ## Ideally would like to do databse generates random id 
+    UserID = "" ## Array of the user id's - obvs just contianig just one here    
+    params = {'GroupId':tuple([GroupId]),'Users':tuple([UserID])}
+    SQLcursor.execute("INSERT INTO public.\"Groups\"(\"GroupId\",\"Users\") VALUES (%(GroupId)s,%(Users)s);",params)
     conn.commit()
     return True
 
