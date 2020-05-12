@@ -132,8 +132,24 @@ def GroupLocked(GroupId):#check if group is locked
     params = {"GroupId":tuple([GroupId])}
     print(SQLcursor.execute("SELECT \"Locked\" FROM \"Groups\" WHERE \"GroupId\" in %(GroupId)s",params))
     return SQLcursor.fetchall()[0][0]
+def AddOutputPlaylist(PlaylistUrl,GroupId):
+    params = {"Playlist":tuple([PlaylistUrl]),"GroupId":tuple([GroupId])}
+    SQLcursor.execute("UPDATE public.\"Groups\" SET \"Output\" = %(Playlist)s WHERE \"GroupId\" in %(GroupId)s ;",params)
+    conn.commit();
+    return True
+def UserPlaylistSubmit(PlaylistId,UserId,GroupId):##user submits the playlist of their "bangers"
+    ##User submits playlist ID
+    ##playlist recorded
+    ##maybe a check on how many that user has submitted - idk , does it go against what were doing?
+    return "s"
 
+def ReturnSongsToVoteOn(UserId,GroupId):
+    ##Queries Submitted Playlists
+    ##Gets all songs
+    ##if song is in liked songs, then it doesn't need to be voted on 
+    ## if song is not in liked songs, it's spotify id is added to an array to be returned out
 
+    return "s"
 ### MISC ##
 
 def PlaylistOutput():
