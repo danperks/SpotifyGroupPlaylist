@@ -89,7 +89,7 @@ def DoesGroupExist(GroupId):
 def AddUserToGroup(UserId,GroupId):## Adds user to group membership , creates record of memebership for that id for that user
     ##Changed Database Schema - Something slightly more normalised 
     if DoesGroupExist(GroupId):
-        if GroupLocked(GroupId) == False:
+        if GroupLocked(GroupId) == False:##only allow new users if group is unlocked
             params = {"UserId":tuple([UserId]),"GroupId":tuple([GroupId])}
             SQLcursor.execute("INSERT INTO public.\"Memberships\"(\"GroupId\", \"UserId\") VALUES (%(GroupId)s, %(UserId)s);",params)
             conn.commit();
@@ -128,8 +128,10 @@ def RemoveUserFromGroup(UserId,GroupId):#reverse of add pretty much - not convin
     else:
         return False;
 
-def GroupLocked(GroupId):
-    return True
+def GroupLocked(GroupId):#check if group is locked
+    params = {"GroupId":tuple([GroupId])}
+    print(SQLcursor.execute("SELECT \"Locked\" FROM \"Groups\" WHERE \"GroupId\" in %(GroupId)s",params))
+    return SQLcursor.fetchall()[0][0]
 
 
 ### MISC ##
