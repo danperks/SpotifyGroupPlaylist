@@ -86,26 +86,29 @@ def DoesGroupExist(GroupId):
         return False;## use to determine if ID unique, yes can be done easily with a postgres func but this is easier to build around for now
 
 
-def AddUserToGroup(UserId,GroupId):## not sure about adding to the array - maybe have seperate table with countless records for a composite userID-GroupID to define membership - not sure on nomrlaisation,but not convinced on this
+def AddUserToGroup(UserId,GroupId):## Adds user to group membership , creates record of memebership for that id for that user
+    ##Changed Database Schema - Something slightly more normalised 
     if DoesGroupExist(GroupId):
-        params = {"UserId":[UserId],"GroupId":GroupId}
-        SQLcursor.execute("UPDATE  \"Groups\" SET \"Users\" = \"Users\" || %(UserId)s WHERE \"GroupId\" =%(GroupId)s ",params)
-        conn.commit();## || = array_cat function / could use array_append instead but theyre close enough for this
-        return True
+        if GroupLocked(GroupId) == False:
+            params = {"UserId":tuple([UserId]),"GroupId":tuple([GroupId])}
+            SQLcursor.execute("INSERT INTO public.\"Memberships\"(\"GroupId\", \"UserId\") VALUES (%(GroupId)s, %(UserId)s);",params)
+            conn.commit();
+            return True
     else:
         ## return an error to display - that the group does not exist - force user to enter new group
         return False
     #check if group exists
-    #Updates the array of users - append
+    #add a memebership
     #commit changes
     #user now in group
     return True
 
 def CreateNewGroup(UserId):
     GroupId =''.join(secrets.choice(string.ascii_letters + string.digits) for _ in range(10)) ## Ideally would like to do databse generates random id 
-    UserID = "" ## Array of the user id's - obvs just contianig just one here    
-    params = {'GroupId':tuple([GroupId]),'Users':tuple([UserID])}
-    SQLcursor.execute("INSERT INTO public.\"Groups\"(\"GroupId\",\"Users\") VALUES (%(GroupId)s,%(Users)s);",params)
+    UserID = str(UserId)
+    Name = UserID+"'s Group" ## Array of the user id's - obvs just contianig just one here    
+    params = {'GroupId':tuple([GroupId]),'Users':tuple([UserID]),"Name":tuple([Name])}
+    SQLcursor.execute("INSERT INTO public.\"Groups\"(\"GroupId\",\"LeadUser\",\"GroupName\") VALUES (%(GroupId)s,%(Users)s,%(Name)s);",params)
     conn.commit()
     return True
 
@@ -116,11 +119,17 @@ def AddUserToDatabase(refresh_token):
     conn.commit()
     return "s"
 
-def RemoveUserFromGroup(UserId,GroupID):#reverse of add pretty much - not convinced on usage but will make anyway
-    if DoesGroupExist(GroupID):
+def RemoveUserFromGroup(UserId,GroupId):#reverse of add pretty much - not convinced on usage but will make anyway
+    if DoesGroupExist(GroupId):
+        params = {"UserId":tuple([UserId]),"GroupId":tuple([GroupId])}
+        SQLcursor.execute("DELETE FROM public.\"Memberships\" WHERE (\"GroupId\", \"UserId\") = (%(GroupId)s, %(UserId)s);",params)
+        conn.commit();
         return True;
     else:
         return False;
+
+def GroupLocked(GroupId):
+    return True
 
 
 ### MISC ##
