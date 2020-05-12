@@ -13,6 +13,9 @@ from flask import jsonify
 from flask import escape
 from spotifyMethods import *
 from config import *
+import random
+import string
+import secrets
 
 
 app = Flask(__name__)
@@ -73,23 +76,33 @@ def page_not_found_error(e):
 
 
 ###### DATABASE METHODS ####
+
 def DoesGroupExist(GroupId):
     params = {'g':tuple([GroupId])}
     SQLcursor.execute("SELECT \"GroupId\" from Groups WHERE \"GroupId\" in %(g)s ",params)
     if SQLcursor.rowcount > 0:
         return True
     else:
-        return False;
+        return False;## use to determine if ID unique, yes can be done easily with a postgres func but this is easier to build around for now
 
-def AddUserToGroup(UserId,GroupId):
+
+def AddUserToGroup(UserId,GroupId):## not sure about adding to the array - maybe have seperate table with countless records for a composite userID-GroupID to define membership - not sure on nomrlaisation,but not convinced on this
+    if DoesGroupExist(GroupId):
+        params = {"UserId":[UserId],"GroupId":GroupId}
+        SQLcursor.execute("UPDATE  \"Groups\" SET \"Users\" = \"Users\" || %(UserId)s WHERE \"GroupId\" =%(GroupId)s ",params)
+        conn.commit();## || = array_cat function / could use array_append instead but theyre close enough for this
+        return True
+    else:
+        ## return an error to display - that the group does not exist - force user to enter new group
+        return False
     #check if group exists
-    #either alter the user array and add the id, or just pull it down unpack, add , and repack with the new one
+    #Updates the array of users - append
     #commit changes
     #user now in group
     return True
 
-def CreateNewGroup(UserId,GroupId):
-    GroupId ="" ## Ideally would like to do databse generates random id 
+def CreateNewGroup(UserId):
+    GroupId =''.join(secrets.choice(string.ascii_letters + string.digits) for _ in range(10)) ## Ideally would like to do databse generates random id 
     UserID = "" ## Array of the user id's - obvs just contianig just one here    
     params = {'GroupId':tuple([GroupId]),'Users':tuple([UserID])}
     SQLcursor.execute("INSERT INTO public.\"Groups\"(\"GroupId\",\"Users\") VALUES (%(GroupId)s,%(Users)s);",params)
@@ -102,6 +115,13 @@ def AddUserToDatabase(refresh_token):
     SQLcursor.execute("INSERT INTO public.\"Users\"(\"UserId\", \"RefreshToken\") VALUES (%(UserID)s,%(Refresh_Token)s);",params)
     conn.commit()
     return "s"
+
+def RemoveUserFromGroup(UserId,GroupID):#reverse of add pretty much - not convinced on usage but will make anyway
+    if DoesGroupExist(GroupID):
+        return True;
+    else:
+        return False;
+
 
 ### MISC ##
 
