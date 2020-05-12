@@ -1,0 +1,59 @@
+body {
+    background: #22b14c;
+    width: 100vw;
+    height: 100vh;
+    margin: 0;
+}
+
+body div.container {
+    align-content: center;
+    padding: 50px 0;
+    width: 80vw;
+    max-width: 60em;
+    background: rgba(0,0,0,0.5);
+    border-radius: 20px;
+}
+
+.central-x {
+    position: relative;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.central-y-child {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+button.login-button {
+    text-align: center;;
+    min-width: 200px;
+    font-size: 20pt;
+    padding: 10px 30px;
+    background-color: rgba(255,255,255,1);
+    border: 1px solid transparent;
+    display: inline-block;
+    border-radius: 20px;
+    transition: background-color 0.5s;
+}
+
+button.login-button:hover{
+    text-align: center;;
+    min-width: 200px;
+    font-size: 20pt;
+    padding: 10px 30px;
+    background-color: #54e07e;
+
+    border-radius: 20px;
+}
+
+
+@media (max-width: 5em) {
+    div button.login-button {
+        max-width: 60vw;
+        min-width: 30vw;
+        font-size: 22pt;
+        text-align: center;
+    }
+}
