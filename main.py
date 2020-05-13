@@ -12,13 +12,21 @@ from flask import url_for
 from flask import jsonify
 from flask import escape
 from spotifyMethods import *
-from config import *
+import sgpconfig
 
+
+config = sgpconfig.SGPConfig()
+if config == None:
+    print("ERROR: Config was not properly initialised, it may not exist")
+    exit(1)
+elif config == "Created":
+    print("WARNING: The config has been created, you will need to edit it")
+    exit(1)
 
 app = Flask(__name__)
 app.static_folder = "static"
 app.template_folder = "templates"
-conn = psycopg2.connect(host = DatabaseHost,database = Database,user = DatabaseUser,password= DatabasePassword)
+conn = psycopg2.connect(host=config.Host, database=config.Database, user=config.User, password=config.Password)
 SQLcursor = conn.cursor()
 ## go environment varible for user and password , will do for now
 #Database

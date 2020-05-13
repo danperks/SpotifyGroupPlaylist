@@ -1,6 +1,14 @@
 import requests
 import urllib
-from config import ClientID , ClientSecret
+import sgpconfig
+
+config = sgpconfig.SGPConfig()
+if config == None:
+    print("ERROR: Config was not properly initialised, it may not exist")
+    exit(1)
+elif config == "Created":
+    print("WARNING: The config has been created, you will need to edit it")
+    exit(1)
 
 ##Thoughts about database - instead of tracking the votes, we can jsut add a "local file " to each database which just has SongName - Vote Count - idk , maybe althouhg would need to think about what is done to stop multiple voting and it is a bodge
 def ApplicationVerification():#https://developer.spotify.com/documentation/general/guides/authorization-guide/
@@ -22,8 +30,8 @@ def GetAuthoristaionToken(AppVerificationToken):
         "grant_type":"authorization_code",
         "code":AppVerificationToken,
         "redirect_uri" : "http://127.0.0.1:5000/SpotifyCallback",  
-        "client_id":ClientID,
-        "client_secret":ClientSecret      
+        "client_id": config.ClientID,
+        "client_secret": config.ClientSecret      
     }
     ##headerParameters = { think it might want client id and secret base 64 but the api docs imply it wil take it in the body ,not convinced but here we go
 
@@ -35,8 +43,8 @@ def RefreshAccessToken(RefreshToken):
     bodyParameters = {
         "grant_type":"refresh_token",
         "refresh_token":RefreshToken,
-        "client_id":ClientID,
-        "client_secret":ClientSecret
+        "client_id": config.ClientID,
+        "client_secret": config.ClientSecret
     }
     return requests.post("https://accounts.spotify.com/api/token",bodyParameters).json()
 
