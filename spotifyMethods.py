@@ -40,8 +40,7 @@ def RefreshAccessToken(RefreshToken):
     }
     return requests.post("https://accounts.spotify.com/api/token",bodyParameters).json()
 
-#code = "AQCkFA0FSjks0q9WmXlgIhNJWi1TuSrFs7Umw5g9JgZ6_8HaDb6yx1w_sTFt4uwHx0U-tQGuZTB9pywDOarw8pvrPzSvjuk5cZRG3yqprZc_b_0xPqgOLgjE312OE6QLVh8u0ykBZy-0XtirME12sdYNs6O2EeZX2Gl2fIkDfBznDLCD8DL2rC8zeCNA8KeH29htkMNvfVWJu9Q"
-#print(RefreshAccessToken(GetAuthoristaionToken(code)["refresh_token"]))
+
 def GetUserID(UserAccessToken):
     headers = {
     "Authorization":'Bearer '+UserAccessToken,
@@ -88,8 +87,21 @@ def GetUsersLikedSongs(UserAccessToken):#Pagination - Deprecated
 def GetUsersPlaylists(UserAccessToken):
     return "s"
 
-def GetItemsInPlaylist(UserAccessToken):
-    return "s"
-
+def GetItemsInPlaylist(PlaylistId,UserAccessToken):
+    SongIds = []
+    headers = {
+        "Accept": "application/json",
+        "Content-Type": "application/json",
+        "Authorization":'Bearer '+UserAccessToken
+        
+    }
+    r = requests.get("https://api.spotify.com/v1/playlists/"+PlaylistId+"/tracks",headers=headers).json()
+    for item in r["items"]:
+        SongIds.append(item["track"]["id"])
+    return SongIds
 def PushToNewPlaylist(UserAccessToken,ArrayOfSongs):
     return "s"
+
+
+
+
