@@ -99,7 +99,12 @@ def GetItemsInPlaylist(PlaylistId,UserAccessToken):
     for item in r["items"]:
         SongIds.append(item["track"]["id"])
     return SongIds
-def PushToNewPlaylist(UserAccessToken,ArrayOfSongs):
+
+
+def PushToNewPlaylist(UserAccessToken,ArrayOfSongs,PlaylistId):
+    ##Takes array
+    ##spotify api -> add items to playlist
+    ##voila
     return "s"
 
 
