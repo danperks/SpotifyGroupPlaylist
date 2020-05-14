@@ -72,7 +72,12 @@ def GoogleLogin():
 def page_not_found_error(e):
     return render_template("404.html"),404
 
+#### Pass Data To Front ###
 
+@app.route("/api/UserGroups",methods=["GET"])
+
+def ReturnUserGroups():
+    return "s"
 
 
 ###### DATABASE METHODS ####
@@ -110,6 +115,7 @@ def CreateNewGroup(UserId):
     params = {'GroupId':tuple([GroupId]),'Users':tuple([UserID]),"Name":tuple([Name])}
     SQLcursor.execute("INSERT INTO public.\"Groups\"(\"GroupId\",\"LeadUser\",\"GroupName\") VALUES (%(GroupId)s,%(Users)s,%(Name)s);",params)
     conn.commit()
+    AddUserToGroup(UserID,GroupId)
     return True
 
 def AddUserToDatabase(refresh_token):
@@ -127,22 +133,40 @@ def RemoveUserFromGroup(UserId,GroupId):#reverse of add pretty much - not convin
         return True;
     else:
         return False;
-
+def GetUsersGroups(UserId):
+    UserGroups = []
+    params = {"UserId":tuple([UserId])}
+    SQLcursor.execute("SELECT \"GroupId\" FROM \"Memberships\" WHERE \"UserId\" in %(UserId)s",params)
+    for item in SQLcursor.fetchall():
+        UserGroups.append(item[0])
+    return UserGroups
 def GroupLocked(GroupId):#check if group is locked
     params = {"GroupId":tuple([GroupId])}
     print(SQLcursor.execute("SELECT \"Locked\" FROM \"Groups\" WHERE \"GroupId\" in %(GroupId)s",params))
     return SQLcursor.fetchall()[0][0]
 def AddOutputPlaylist(PlaylistUrl,GroupId):
-    params = {"Playlist":tuple([PlaylistUrl]),"GroupId":tuple([GroupId])}
+    params = {"Playlist":tuple([PlaylistUrl]),"GroupId":tuple([GroupId])}#maybe change that to playlist id - idk , see what happens
     SQLcursor.execute("UPDATE public.\"Groups\" SET \"Output\" = %(Playlist)s WHERE \"GroupId\" in %(GroupId)s ;",params)
     conn.commit();
     return True
-def UserPlaylistSubmit(PlaylistId,UserId,GroupId):##user submits the playlist of their "bangers"
+def UserPlaylistSubmit(PlaylistId,UserId,GroupId):
+    params = {"Playlist":tuple([PlaylistId]),"GroupId":tuple([GroupId]),"UserId":tuple([UserId])}
+    SQLcursor.execute("INSERT INTO public.\"PlaylistSubmission\"(\"UserId\",\"PlaylistId\",\"GroupRelation\") VALUES (%(UserId)s,%(Playlist)s,%(GroupId)s);",params)
+    conn.commit()##user submits the playlist of their "bangers"
     ##User submits playlist ID
     ##playlist recorded
     ##maybe a check on how many that user has submitted - idk , does it go against what were doing?
+    #when user submits their own playlist each song they put in it is added to the "banger" song table as a vote on their behalf
     return "s"
 
+def ReturnGroupPropostionPlaylists(GroupId):
+    Playlists = []
+    params = {"GroupId":tuple([GroupId])}
+    SQLcursor.execute("SELECT \"PlaylistId\" FROM \"PlaylistSubmission\" WHERE \"GroupRelation\" in %(GroupId)s",params)
+    for item in SQLcursor.fetchall():
+        Playlists.append(item[0])
+    return Playlists
+    
 def ReturnSongsToVoteOn(UserId,GroupId):
     ##Queries Submitted Playlists
     ##Gets all songs
@@ -150,6 +174,12 @@ def ReturnSongsToVoteOn(UserId,GroupId):
     ## if song is not in liked songs, it's spotify id is added to an array to be returned out
 
     return "s"
+
+def AddSongVote(SongId,UserId,LikedBool):
+    params = {"SongId":tuple([SongId]),"UserId":tuple([UserId]),"Liked":tuple([LikedBool])}
+    SQLcursor.execute("INSERT INTO public.\"Songs\"(\"SongId\",\"User\",\"VoteInFavour\") VALUES (%(SongId)s,%(UserId)s,%(Liked)s);",params)
+    conn.commit();
+    return True
 ### MISC ##
 
 def PlaylistOutput():
@@ -159,6 +189,19 @@ def PlaylistOutput():
     ## obtain access token using above
     ## create new playlist in that users library
     ## add neccessary songs to that playlist
+
+    ##Check to see all songs have been voted on , done by checking accs then check the db for those not in accs
+    ##once all done
+    ##Those in db with all votes are added to playlist output
+    ##then
+    ## For every song not marked off by each user , the song is queried against that users library to see if liked, if liked that vote is then taken
+    ##when all songs have received a vote then they are put on the output playlsit
+    ##
+
+    ##sketchy : but could assume that a missing vote on the db indicates it's already saved to that user's library as we record new likes and dislikes , meaning that old likes are the only ones missing
+    ##would however mean that not voting counts in favour, but probably best incase someone fails to keep voting , idk
+
+    ##
     return "s"
 
 
