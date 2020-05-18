@@ -64,11 +64,13 @@ def SpotifyLogIn():
 def ReturnSongsToVoteOn(UserId,GroupId):
     AuthToken = 0## Can wait for now , obvs wont work tho until that is requested
     Playlists = ReturnGroupPropostionPlaylists(GroupId)
-    Songs = []
+    Songs = []    
     for item in Playlists:##adds all songs to the playlist
         for song in GetItemsInPlaylist(item,AuthToken):
             Songs.append(song)
+    PreclearedSongs = IsSongInUserLibrary(Songs,AuthToken,0,len(Songs))
 
+    return list(set(PreclearedSongs).difference(set(Songs))) # sketchy , but will review later, about to have lunch, probably also should return up to json, but that can wait until after lunch
     ##Queries Submitted Playlists
     ##Gets all songs
     ##if song is in liked songs, then it doesn't need to be voted on 
