@@ -60,14 +60,22 @@ def LoadIntoGroup():
 def SpotifyLogIn():
         return redirect(ApplicationVerification())
     
-@app.route("/Login/Apple")
-def AppleLogIn():
-    return "0";
-@app.route("/Login/Google")
-def GoogleLogin():
-    return "0";
+@app.route("/ReturnSongsAwaitVote",methods = ["POST"])
+def ReturnSongsToVoteOn(UserId,GroupId):
+    AuthToken = 0## Can wait for now , obvs wont work tho until that is requested
+    Playlists = ReturnGroupPropostionPlaylists(GroupId)
+    Songs = []
+    for item in Playlists:##adds all songs to the playlist
+        for song in GetItemsInPlaylist(item,AuthToken):
+            Songs.append(song)
 
+    ##Queries Submitted Playlists
+    ##Gets all songs
+    ##if song is in liked songs, then it doesn't need to be voted on 
+    ## if song is not in liked songs, it's spotify id is added to an array to be returned out
 
+    return "s"
+##Removed the google and apple placeholder
 @app.errorhandler(404)
 def page_not_found_error(e):
     return render_template("404.html"),404
@@ -167,13 +175,7 @@ def ReturnGroupPropostionPlaylists(GroupId):
         Playlists.append(item[0])
     return Playlists
     
-def ReturnSongsToVoteOn(UserId,GroupId):
-    ##Queries Submitted Playlists
-    ##Gets all songs
-    ##if song is in liked songs, then it doesn't need to be voted on 
-    ## if song is not in liked songs, it's spotify id is added to an array to be returned out
 
-    return "s"
 
 def AddSongVote(SongId,UserId,LikedBool):
     params = {"SongId":tuple([SongId]),"UserId":tuple([UserId]),"Liked":tuple([LikedBool])}

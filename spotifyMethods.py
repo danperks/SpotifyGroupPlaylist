@@ -48,7 +48,9 @@ def GetUserID(UserAccessToken):
     return requests.get('https://api.spotify.com/v1/me', headers=headers).json()["id"]
 
 
-def IsSongInUserLibrary(ListOfSpotifyID,UserAccessToken):
+def IsSongInUserLibrary(ListOfSpotifyID,UserAccessToken,start,end):#not convinced on the recrusion parameters ,but this was done at 1am and outputs seemingly something that makes sense as an expected output
+    if start == end:
+        return 
     AlreadyPresent = []
     headers = {
         "Accept": "application/json",
@@ -56,14 +58,23 @@ def IsSongInUserLibrary(ListOfSpotifyID,UserAccessToken):
         "Authorization":'Bearer '+UserAccessToken
     }
     bodyParameters={
-        "ids":ListOfSpotifyID
+        "ids":",".join(ListOfSpotifyID)
     }
-
-    return requests.get("https://api.spotify.com/v1/me/tracks/contains",headers=headers,params=bodyParameters).json()
+    
+    r= requests.get("https://api.spotify.com/v1/me/tracks/contains",headers=headers,params=bodyParameters)
+    for item in ListOfSpotifyID[start:end]:
+        if list(r.json())[ListOfSpotifyID.index(item)] ==True:
+            #print(item)
+            AlreadyPresent.append(item)
+    if len(ListOfSpotifyID)<end+50:
+        AlreadyPresent.append(IsSongInUserLibrary(ListOfSpotifyID,UserAccessToken,end,len(ListOfSpotifyID)))
+    if len(ListOfSpotifyID)>=end+50:
+        AlreadyPresent.append(IsSongInUserLibrary(ListOfSpotifyID,UserAccessToken,end,end+50))
+    return AlreadyPresent
     #for every 50ID's
     #send API Request
     #if true add song ID to ArrayOfUserApproved
-    return "s"
+    
 
 def GetUsersLikedSongs(UserAccessToken):#Pagination - Deprecated
     LikedSoFar = "";
