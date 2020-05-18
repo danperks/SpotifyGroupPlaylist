@@ -48,9 +48,9 @@ def GetUserID(UserAccessToken):
     return requests.get('https://api.spotify.com/v1/me', headers=headers).json()["id"]
 
 
-def IsSongInUserLibrary(ListOfSpotifyID,UserAccessToken,start,end):#not convinced on the recrusion parameters ,but this was done at 1am and outputs seemingly something that makes sense as an expected output
-    if start == end:
-        return 
+def IsSongInUserLibrary(ListOfSpotifyID,UserAccessToken,start,end):
+    if start == len(ListOfSpotifyID):
+        return []
     AlreadyPresent = []
     headers = {
         "Accept": "application/json",
@@ -58,18 +58,24 @@ def IsSongInUserLibrary(ListOfSpotifyID,UserAccessToken,start,end):#not convince
         "Authorization":'Bearer '+UserAccessToken
     }
     bodyParameters={
-        "ids":",".join(ListOfSpotifyID)
+        "ids":",".join(ListOfSpotifyID[start:end])
     }
     
     r= requests.get("https://api.spotify.com/v1/me/tracks/contains",headers=headers,params=bodyParameters)
     for item in ListOfSpotifyID[start:end]:
-        if list(r.json())[ListOfSpotifyID.index(item)] ==True:
-            #print(item)
+        if r.json()[ListOfSpotifyID.index(item)-start] ==True:        
             AlreadyPresent.append(item)
-    if len(ListOfSpotifyID)<end+50:
-        AlreadyPresent.append(IsSongInUserLibrary(ListOfSpotifyID,UserAccessToken,end,len(ListOfSpotifyID)))
-    if len(ListOfSpotifyID)>=end+50:
-        AlreadyPresent.append(IsSongInUserLibrary(ListOfSpotifyID,UserAccessToken,end,end+50))
+
+    
+            
+    if len(ListOfSpotifyID)<=end+49:
+        AlreadyPresent=[*AlreadyPresent,*IsSongInUserLibrary(ListOfSpotifyID,UserAccessToken,end,len(ListOfSpotifyID))]
+        #print(AlreadyPresent)
+    if len(ListOfSpotifyID)>end+49:
+        #print("lower")
+        AlreadyPresent=[*AlreadyPresent,*IsSongInUserLibrary(ListOfSpotifyID,UserAccessToken,end,(end+49))]
+       # print(AlreadyPresent)
+    
     return AlreadyPresent
     #for every 50ID's
     #send API Request
@@ -103,7 +109,7 @@ def GetItemsInPlaylist(PlaylistId,UserAccessToken):
     headers = {
         "Accept": "application/json",
         "Content-Type": "application/json",
-        "Authorization":'Bearer '+UserAccessToken
+        "Authorization":'Bearer '+str(UserAccessToken)
         
     }
     r = requests.get("https://api.spotify.com/v1/playlists/"+PlaylistId+"/tracks",headers=headers).json()
