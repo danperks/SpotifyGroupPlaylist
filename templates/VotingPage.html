@@ -1,0 +1,34 @@
+<!doctype html>
+<html>
+<head>
+    <title>Spotify Group Bangers</title>
+    <link rel="stylesheet" type="text/css" href="../static/main.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>       
+</head>
+<body class="central-y-child">
+    <div class="container" style="margin-bottom: 4em;">
+    
+    <button onclick = "VoteInFavour()">Vote In Favour</button>
+    <button onclick = "VoteAgainst()">Vote Against</button>
+</body>
+    <script>
+        
+        async function GetSongsToVoteOn(){
+            $.post('/ReturnSongsAwaitVote',{UserId:"test"}).done(function(data){
+                alert(data);
+            });
+            
+            
+
+        }
+        function VoteInFavour(){
+            alert("Vote In Favour")
+            GetSongsToVoteOn()
+        }
+
+        function VoteAgainst(){
+            alert("Vote Against")
+        }
+    </script>
+
+</html>
