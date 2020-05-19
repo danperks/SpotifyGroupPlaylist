@@ -8,26 +8,48 @@
 <body class="central-y-child">
     <div class="container" style="margin-bottom: 4em;">
     
-    <button onclick = "VoteInFavour()">Vote In Favour</button>
-    <button onclick = "VoteAgainst()">Vote Against</button>
+    <button id = "InFavourButton" onclick = "VoteInFavour()" disabled = "disabled">Banger</button>
+    <button id = "AgainstButton" onclick = "VoteAgainst()"  disabled = "disabled">Dud</button>
 </body>
     <script>
+        SongsToVoteOn =[];
+        VotesInFavour = [];
+        VotesAgainst  = [];
+        CurrentSong = ""
+        $(document).ready(function() {        
+            $.post('/ReturnSongsAwaitVote',{GroupId:"J9r9J30pwi"}).done(function(data){
+                SongsToVoteOn= SongsToVoteOn.concat(data);
+                console.log(SongsToVoteOn[8]);
+            }).done(MakeButtonsLive())})
+            
         
-        async function GetSongsToVoteOn(){
-            $.post('/ReturnSongsAwaitVote',{UserId:"test"}).done(function(data){
-                alert(data);
-            });
-            
-            
-
+        function MakeButtonsLive(){//probably should mess around with doing this propelry off a chain of promises / async funcitons etc, but acc that seems to work so , even if sketchy
+            console.log("DocumentReady")
+            console.log(SongsToVoteOn)
+            if (SongsToVoteOn.length >0){
+                $("#AgainstButton").prop("disabled", false);
+                $("#InFavourButton").prop("disabled", false);
+                
+                CurrentSong = SongsToVoteOn[0];
+                console.log(CurrentSong)
+            }
         }
+        
         function VoteInFavour(){
-            alert("Vote In Favour")
-            GetSongsToVoteOn()
+            alert("Vote In Favour" + CurrentSong);
+            VotesInFavour.push(CurrentSong);
+            NextSong();
+            
         }
 
         function VoteAgainst(){
-            alert("Vote Against")
+            alert(CurrentSong)
+            alert("Vote Against" + CurrentSong);
+            VotesAgainst.push(CurrentSong);
+            NextSong();
+        }
+        function NextSong(){
+            console.log("Next Song Called");
         }
     </script>
 

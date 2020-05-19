@@ -38,7 +38,7 @@ def RefreshAccessToken(RefreshToken):
         "client_id":ClientID,
         "client_secret":ClientSecret
     }
-    return requests.post("https://accounts.spotify.com/api/token",bodyParameters).json()
+    return requests.post("https://accounts.spotify.com/api/token",bodyParameters).json()["access_token"]
 
 
 def GetUserID(UserAccessToken):
@@ -63,7 +63,7 @@ def IsSongInUserLibrary(ListOfSpotifyID,UserAccessToken,start,end):
     
     r= requests.get("https://api.spotify.com/v1/me/tracks/contains",headers=headers,params=bodyParameters)
     for item in ListOfSpotifyID[start:end]:
-        if r.json()[ListOfSpotifyID.index(item)-start] ==True:        
+       if r.json()[ListOfSpotifyID.index(item)-start] ==True:        
             AlreadyPresent.append(item)
 
     
@@ -113,8 +113,10 @@ def GetItemsInPlaylist(PlaylistId,UserAccessToken):
         
     }
     r = requests.get("https://api.spotify.com/v1/playlists/"+PlaylistId+"/tracks",headers=headers).json()
+    
     for item in r["items"]:
         SongIds.append(item["track"]["id"])
+    
     return SongIds
 
 

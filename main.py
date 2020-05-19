@@ -36,6 +36,7 @@ def SpotifyCallBack(): # Spotify Logins in the user, user redirected to the grou
     RefreshToken = AuthToken["refresh_token"]#tokens expire after one hour
     resp = make_response(render_template("Login.html"))
     resp.set_cookie("RefreshToken",RefreshToken)
+    resp.set_cookie("AuthToken",AuthToken)
     AddUserToDatabase(RefreshToken)
     return resp
     
@@ -45,7 +46,10 @@ def indexStart():
         print(request.cookies)
         print("Cookie Present")#just check for the token
         PreviousAuthorisation = request.cookies["RefreshToken"]
-        return render_template("Login.html")
+        resp = make_response(render_template("Login.html"))
+        print(RefreshAccessToken(PreviousAuthorisation))
+        resp.set_cookie("AuthToken",RefreshAccessToken(PreviousAuthorisation))
+        return resp
     else:
         print("No Cookie Present")
         return render_template("index.html")   
@@ -54,29 +58,35 @@ def indexStart():
 def LoadIntoGroup():
     GroupID = escape(request.form["GroupCode"])
     if DoesGroupExist(GroupID) == True:
-        return "s"
+        return render_template("VotingPage.html")
     return "s"
 @app.route("/SpotifyAuthorise") #Create a check to see if user is already registed, if they are then we need to call a refresh token rather than a new one
 def SpotifyLogIn():
         return redirect(ApplicationVerification())
     
 @app.route("/ReturnSongsAwaitVote",methods = ["POST"])
-def ReturnSongsToVoteOn(UserId,GroupId):
-    AuthToken = 0## Can wait for now , obvs wont work tho until that is requested
+def ReturnSongsToVoteOn():
+    #GroupId = request.form["GroupId"]
+    GroupId = request.form["GroupId"]
+    UserId = GetUserIDFromRefreshToken(str(request.cookies["RefreshToken"]))
+    AuthToken = request.cookies["AuthToken"]
     Playlists = ReturnGroupPropostionPlaylists(GroupId)
     Songs = []    
     for item in Playlists:##adds all songs to the playlist
         for song in GetItemsInPlaylist(item,AuthToken):
             Songs.append(song)
-    PreclearedSongs = IsSongInUserLibrary(Songs,AuthToken,0,len(Songs))
-
-    return list(set(PreclearedSongs).difference(set(Songs))) # sketchy , but will review later, about to have lunch, probably also should return up to json, but that can wait until after lunch
+    
+    PreclearedSongs = IsSongInUserLibrary(Songs,AuthToken,0,49)#returns the songs that are in the usesrs library
+    print(PreclearedSongs)
+    #return jsonify("s")
+    #print("JSON" + str(list(set(Songs).difference(set(PreclearedSongs)))))
+    return jsonify(list(set(Songs).difference(set(PreclearedSongs)))) # sketchy , but will review later, about to have lunch, probably also should return up to json, but that can wait until after lunch
     ##Queries Submitted Playlists
     ##Gets all songs
     ##if song is in liked songs, then it doesn't need to be voted on 
     ## if song is not in liked songs, it's spotify id is added to an array to be returned out
 
-    return "s"
+    
 ##Removed the google and apple placeholder
 @app.errorhandler(404)
 def page_not_found_error(e):
@@ -94,7 +104,7 @@ def ReturnUserGroups():
 
 def DoesGroupExist(GroupId):
     params = {'g':tuple([GroupId])}
-    SQLcursor.execute("SELECT \"GroupId\" from Groups WHERE \"GroupId\" in %(g)s ",params)
+    SQLcursor.execute("SELECT \"GroupId\" from public.\"Groups\" WHERE \"GroupId\" in %(g)s ",params)
     if SQLcursor.rowcount > 0:
         return True
     else:
@@ -176,7 +186,12 @@ def ReturnGroupPropostionPlaylists(GroupId):
     for item in SQLcursor.fetchall():
         Playlists.append(item[0])
     return Playlists
-    
+
+def GetUserIDFromRefreshToken(Refresh_Token):
+    params = {"RefreshToken":tuple([Refresh_Token])}
+    SQLcursor.execute("SELECT 'UserId' FROM public.\"Users\" WHERE \"RefreshToken\" in %(RefreshToken)s",params)
+    for item in SQLcursor.fetchall():
+        return item[0]
 
 
 def AddSongVote(SongId,UserId,LikedBool):
