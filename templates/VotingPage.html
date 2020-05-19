@@ -17,9 +17,10 @@
         VotesAgainst  = [];
         CurrentSong = ""
         $(document).ready(function() {        
-            $.post('/ReturnSongsAwaitVote',{GroupId:"J9r9J30pwi"}).done(function(data){
-                SongsToVoteOn= SongsToVoteOn.concat(data);
+            $.get('/ReturnSongsAwaitVote',{GroupId:"J9r9J30pwi"}).done(function(data){
+                SongsToVoteOn= data;
                 console.log(SongsToVoteOn[8]);
+                MakeButtonsLive()
             }).done(MakeButtonsLive())})
             
         
@@ -50,6 +51,9 @@
         }
         function NextSong(){
             console.log("Next Song Called");
+        }
+        function SetAlbumImage(){
+            
         }
     </script>
 

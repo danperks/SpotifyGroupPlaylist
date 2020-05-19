@@ -64,10 +64,10 @@ def LoadIntoGroup():
 def SpotifyLogIn():
         return redirect(ApplicationVerification())
     
-@app.route("/ReturnSongsAwaitVote",methods = ["POST"])
+@app.route("/ReturnSongsAwaitVote",methods = ["GET"])
 def ReturnSongsToVoteOn():
     #GroupId = request.form["GroupId"]
-    GroupId = request.form["GroupId"]
+    GroupId = request.args["GroupId"]
     UserId = GetUserIDFromRefreshToken(str(request.cookies["RefreshToken"]))
     AuthToken = request.cookies["AuthToken"]
     Playlists = ReturnGroupPropostionPlaylists(GroupId)
