@@ -62,6 +62,7 @@ def IsSongInUserLibrary(ListOfSpotifyID,UserAccessToken,start,end):
     }
     
     r= requests.get("https://api.spotify.com/v1/me/tracks/contains",headers=headers,params=bodyParameters)
+    print(r)
     for item in ListOfSpotifyID[start:end]:
        if r.json()[ListOfSpotifyID.index(item)-start] ==True:        
             AlreadyPresent.append(item)
