@@ -3,11 +3,34 @@
 <head>
     <title>Spotify Group Bangers</title>
     <link rel="stylesheet" type="text/css" href="/static/css/main.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script> 
 </head>
 <body>
     <form action = "/form/EnterCode" method = "POST">
         <input type="text" name="GroupCode" placeholder="Enter Group Code">
     </form>
+    <table id = "GroupTable">
+        <th>Group Name</th>
+        <th>Group Id</th>
+    </table>
+    <button onclick="CreateAGroup()"> Create A Group</button>
     
 </body>
+<script>
+    $(document).ready(function(){
+        $.get("/api/UserGroups").done(function(data){
+            var table = document.getElementById("GroupTable")
+            for(i =0;i<data[0].length;i++){
+                var row = table.insertRow();
+                var cell1 = row.insertCell(0).innerHTML=data[0][i];
+                var cell2 = row.insertCell(1).innerHTML=data[1][i];
+                
+            }
+    })
+})
+
+function CreateAGroup(){
+    alert("Try To Create A Group")
+}
+</script>
 </html>
