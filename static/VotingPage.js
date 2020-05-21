@@ -9,7 +9,7 @@ var CurrentSong = "";
 
 
 
-var CurrentGroup = sessionStorage.getItem("CurrentGroup")
+var CurrentGroup = sessionStorage.getItem("CurrentGroup");
 $(document).ready(function() {
     $.get('/ReturnSongsAwaitVote',{GroupId:CurrentGroup}).done(function(data){
         SongsToVoteOn= data;
@@ -25,7 +25,7 @@ function MakeButtonsLive(){//probably should mess around with doing this propelr
     if (SongsToVoteOn.length >0){
         $("#AgainstButton").prop("disabled", false);
         $("#InFavourButton").prop("disabled", false);
-        alert(sessionStorage.getItem("CurrentGroup"));
+        //alert(sessionStorage.getItem("CurrentGroup"));
         CurrentSong = SongsToVoteOn[0];
         //console.log(CurrentSong)
     }
@@ -35,6 +35,7 @@ function VoteInFavour(){
     //alert("Vote In Favour" + CurrentSong);
     VotesInFavour.push(CurrentSong);
     NextSong();
+
     
 }
 
@@ -52,7 +53,7 @@ function NextSong(){
     }
     else{
         //Now at end of the list
-        PackUpSendBack()
+        PackUpSendBack();
     }
     // console.log(SongsToVoteOnTwo)
     
@@ -67,13 +68,14 @@ function SetAlbumImage(SongID){
             document.getElementById("AlbumCover").src = response["album"]["images"][0]["url"];
             document.getElementById("Artist").innerHTML = response["artists"][0]["name"];// will only get first artist but you know where to go with that
             document.getElementById("Title").innerHTML = response["name"]
-            alert(Cookies.get("AuthToken"))
+           // alert(Cookies.get("AuthToken"))
         }
 
     })
 }
 function PackUpSendBack(){
-    alert("End Of List Reached")
+    alert("End Of List Reached");
+    console.log(JSON.parse(VotesInFavour));
     // Both Arrays combined into JSON String wdetailing what each array is
     //field for group added
     //field for user id added
