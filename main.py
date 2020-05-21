@@ -26,10 +26,10 @@ SQLcursor = conn.cursor()
 ## go environment varible for user and password , will do for now
 #Database
 
-@app.route("/JoinGroup",methods=["GET"])
-def JoinGroup():
+@app.route("/CreateGroup",methods=["GET"])
+def CreateGroup():
     UserID = GetUserIDFromRefreshToken(str(request.cookies["RefreshToken"]))
-    return "s"
+    return CreateNewGroup(UserID)[1]
 @app.route("/SpotifyCallback")
 
 def SpotifyCallBack(): # Spotify Logins in the user, user redirected to the group entry page
@@ -62,8 +62,10 @@ def indexStart():
 @app.route("/form/EnterCode",methods=["POST"])
 def LoadIntoGroup():
     GroupID = escape(request.form["GroupCode"])
+    UserID = GetUserIDFromRefreshToken(str(request.cookies["RefreshToken"]))
     if DoesGroupExist(GroupID) == True:
-        return render_template("VotingPage.html")
+        if AddUserToGroup(UserID,GroupID):
+            return render_template("VotingPage.html")
     return "s"
 @app.route("/SpotifyAuthorise") #Create a check to see if user is already registed, if they are then we need to call a refresh token rather than a new one
 def SpotifyLogIn():
@@ -123,11 +125,13 @@ def DoesGroupExist(GroupId):
 def AddUserToGroup(UserId,GroupId):## Adds user to group membership , creates record of memebership for that id for that user
     ##Changed Database Schema - Something slightly more normalised 
     if DoesGroupExist(GroupId):
-        if GroupLocked(GroupId) == False:##only allow new users if group is unlocked
-            params = {"UserId":tuple([UserId]),"GroupId":tuple([GroupId])}
-            SQLcursor.execute("INSERT INTO public.\"Memberships\"(\"GroupId\", \"UserId\") VALUES (%(GroupId)s, %(UserId)s);",params)
-            conn.commit();
-            return True
+        if GroupId not in GetUsersGroups(UserId):
+            if GroupLocked(GroupId) == False:
+                #only allow new users if group is unlocked
+                params = {"UserId":tuple([UserId]),"GroupId":tuple([GroupId])}
+                SQLcursor.execute("INSERT INTO public.\"Memberships\"(\"GroupId\", \"UserId\") VALUES (%(GroupId)s, %(UserId)s);",params)
+                conn.commit();
+                return True
     else:
         ## return an error to display - that the group does not exist - force user to enter new group
         return False
@@ -145,7 +149,7 @@ def CreateNewGroup(UserId):
     SQLcursor.execute("INSERT INTO public.\"Groups\"(\"GroupId\",\"LeadUser\",\"GroupName\") VALUES (%(GroupId)s,%(Users)s,%(Name)s);",params)
     conn.commit()
     AddUserToGroup(UserID,GroupId)
-    return True
+    return (True,GroupId)
 
 def AddUserToDatabase(refresh_token):
     UserID = GetUserID(RefreshAccessToken(refresh_token)["access_token"])
