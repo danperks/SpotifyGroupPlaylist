@@ -69,7 +69,6 @@ def LoadIntoGroup():
     UserID = GetUserIDFromRefreshToken(str(request.cookies["RefreshToken"]))
     if DoesGroupExist(GroupID) == True:
         if AddUserToGroup(UserID,GroupID):
-            session["CurrentGroup"] = GroupID
             return render_template("VotingPage.html")
     return "s"
 @app.route("/SpotifyAuthorise") #Create a check to see if user is already registed, if they are then we need to call a refresh token rather than a new one
@@ -81,8 +80,10 @@ def ReturnSongsToVoteOn():
     #GroupId = request.form["GroupId"]
     GroupId = request.args["GroupId"]
     UserId = GetUserIDFromRefreshToken(str(request.cookies["RefreshToken"]))
+    if IsUserInGroup(UserId,GroupId) == False:
+        return render_template("Login.html")
     AuthToken = request.cookies["AuthToken"]
-    Playlists = ReturnGroupPropostionPlaylists(GroupId)
+    Playlists = ReturnGroupPropostionPlaylists(UserId,GroupId)
     Songs = []    
     for item in Playlists:##adds all songs to the playlist
         for song in GetItemsInPlaylist(item,AuthToken):
@@ -164,7 +165,11 @@ def AddUserToDatabase(refresh_token):
     SQLcursor.execute("INSERT INTO public.\"Users\"(\"UserId\", \"RefreshToken\") VALUES (%(UserID)s,%(Refresh_Token)s);",params)
     conn.commit()
     return "s"
-
+def IsUserInGroup(UserID,GroupID):
+    if GroupID in GetUsersGroups(UserID):
+        return True
+    else:
+        return False
 def RemoveUserFromGroup(UserId,GroupId):#reverse of add pretty much - not convinced on usage but will make anyway
     if DoesGroupExist(GroupId):
         params = {"UserId":tuple([UserId]),"GroupId":tuple([GroupId])}
@@ -209,10 +214,10 @@ def UserPlaylistSubmit(PlaylistId,UserId,GroupId):
     #when user submits their own playlist each song they put in it is added to the "banger" song table as a vote on their behalf
     return "s"
 
-def ReturnGroupPropostionPlaylists(GroupId):
+def ReturnGroupPropostionPlaylists(UserId,GroupId):
     Playlists = []
-    params = {"GroupId":tuple([GroupId])}
-    SQLcursor.execute("SELECT \"PlaylistId\" FROM \"PlaylistSubmission\" WHERE \"GroupRelation\" in %(GroupId)s",params)
+    params = {"GroupId":tuple([GroupId]),"UserId":tuple([UserId])}
+    SQLcursor.execute("SELECT \"PlaylistId\" FROM \"PlaylistSubmission\" WHERE \"GroupRelation\" in %(GroupId)s AND \"UserId\" NOT in %(UserId)s",params)
     for item in SQLcursor.fetchall():
         Playlists.append(item[0])
     return Playlists
@@ -230,6 +235,16 @@ def AddSongVote(SongId,UserId,LikedBool):
     conn.commit();
     return True
 ### MISC ##
+
+def HaveAllVotesBeenReceived():##plan is sketchy but it will do for now
+    ##runs when the user reaches the end of the users stack to vote with
+    ##checks every song in the group
+    ##counts the amounts of votes the song has(not in favour or against just number) and records
+    ##checks each user to see if they have it in their liked songs(could check just those that havent voted for it) and increase the number on the count for that song
+    ##if count still hasnt reached the amount of users in the group for that song
+    ##then it checks within the submitted playlists to see if any users have marked it on a banger playlist
+    ##once the count for all the songs is the same as the amount of users in the group , all votes have been recived
+    return "s"
 
 def PlaylistOutput():
     ##not neccessarily all in this method but the plan

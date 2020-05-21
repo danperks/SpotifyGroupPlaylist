@@ -7,8 +7,8 @@
 </head>
 <body>
     <form action = "/form/EnterCode" method = "POST">
-        <input type="text" name="GroupCode" placeholder="Enter Group Code">
-        <button type = "submit"> Load Into Group</button>
+        <input type="text" id="EnteredGroup" name="GroupCode" placeholder="Enter Group Code">
+        <button type = "submit" onclick="Submission()"> Load Into Group</button>
     </form>
     <table id = "GroupTable">
         <th>Group Name</th>
@@ -18,6 +18,10 @@
     
 </body>
 <script>
+    function Submission(){
+        sessionStorage.setItem("CurrentGroup",document.getElementById("EnteredGroup").value);//set current group
+        
+    }
     $(document).ready(function(){
         $.get("/api/UserGroups").done(function(data){
             var table = document.getElementById("GroupTable")

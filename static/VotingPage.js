@@ -9,9 +9,9 @@ var CurrentSong = "";
 
 
 
-
+var CurrentGroup = sessionStorage.getItem("CurrentGroup")
 $(document).ready(function() {
-    $.get('/ReturnSongsAwaitVote',{GroupId:"J9r9J30pwi"}).done(function(data){
+    $.get('/ReturnSongsAwaitVote',{GroupId:CurrentGroup}).done(function(data){
         SongsToVoteOn= data;
         //alert(SongsToVoteOn)
         NextSong();
