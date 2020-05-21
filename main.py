@@ -25,6 +25,11 @@ conn = psycopg2.connect(host = DatabaseHost,database = Database,user = DatabaseU
 SQLcursor = conn.cursor()
 ## go environment varible for user and password , will do for now
 #Database
+
+@app.route("/JoinGroup",methods=["GET"])
+def JoinGroup():
+    UserID = GetUserIDFromRefreshToken(str(request.cookies["RefreshToken"]))
+    return "s"
 @app.route("/SpotifyCallback")
 
 def SpotifyCallBack(): # Spotify Logins in the user, user redirected to the group entry page
@@ -97,7 +102,11 @@ def page_not_found_error(e):
 @app.route("/api/UserGroups",methods=["GET"])
 
 def ReturnUserGroups():
-    return "s"
+    UserID = GetUserIDFromRefreshToken(str(request.cookies["RefreshToken"]))
+    Groups = GetUsersGroups(UserID)
+    Names = GetGroupNames(Groups)
+    return jsonify(Groups,Names)
+    
 
 
 ###### DATABASE METHODS ####
@@ -160,6 +169,13 @@ def GetUsersGroups(UserId):
     for item in SQLcursor.fetchall():
         UserGroups.append(item[0])
     return UserGroups
+def GetGroupNames(Groups):
+    Names = []
+    params ={"Groups":tuple(Groups)}
+    SQLcursor.execute("SELECT \"GroupName\" FROM \"Groups\" WHERE \"GroupId\" in %(Groups)s",params)
+    for item in SQLcursor.fetchall():
+        Names.append(item[0])
+    return Names
 def GroupLocked(GroupId):#check if group is locked
     params = {"GroupId":tuple([GroupId])}
     print(SQLcursor.execute("SELECT \"Locked\" FROM \"Groups\" WHERE \"GroupId\" in %(GroupId)s",params))
@@ -189,7 +205,7 @@ def ReturnGroupPropostionPlaylists(GroupId):
 
 def GetUserIDFromRefreshToken(Refresh_Token):
     params = {"RefreshToken":tuple([Refresh_Token])}
-    SQLcursor.execute("SELECT 'UserId' FROM public.\"Users\" WHERE \"RefreshToken\" in %(RefreshToken)s",params)
+    SQLcursor.execute("SELECT \"UserId\" FROM public.\"Users\" WHERE \"RefreshToken\" in %(RefreshToken)s",params)
     for item in SQLcursor.fetchall():
         return item[0]
 
