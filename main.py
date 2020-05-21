@@ -126,7 +126,13 @@ def DoesGroupExist(GroupId):
         return True
     else:
         return False;## use to determine if ID unique, yes can be done easily with a postgres func but this is easier to build around for now
-
+def DoesUserExist(UserId):
+    params = {'g':tuple([UserId])}
+    SQLcursor.execute("SELECT \"UserId\" from public.\"Users\" WHERE \"UserId\" in %(g)s ",params)
+    if SQLcursor.rowcount > 0:
+        return True
+    else:
+        return False;
 
 def AddUserToGroup(UserId,GroupId):## Adds user to group membership , creates record of memebership for that id for that user
     ##Changed Database Schema - Something slightly more normalised 
@@ -160,10 +166,14 @@ def CreateNewGroup(UserId):
     return (True,GroupId)
 
 def AddUserToDatabase(refresh_token):
-    UserID = GetUserID((RefreshAccessToken(refresh_token)))
-    params = {'UserID':tuple([UserID]),'Refresh_Token':tuple([refresh_token])}
-    SQLcursor.execute("INSERT INTO public.\"Users\"(\"UserId\", \"RefreshToken\") VALUES (%(UserID)s,%(Refresh_Token)s);",params)
-    conn.commit()
+    if DoesUserExist == False:
+        UserID = GetUserID((RefreshAccessToken(refresh_token)))
+        params = {'UserID':tuple([UserID]),'Refresh_Token':tuple([refresh_token])}
+        SQLcursor.execute("INSERT INTO public.\"Users\"(\"UserId\", \"RefreshToken\") VALUES (%(UserID)s,%(Refresh_Token)s);",params)
+        conn.commit()
+        return True;
+    else:
+        return True;
     return "s"
 def IsUserInGroup(UserID,GroupID):
     if GroupID in GetUsersGroups(UserID):
