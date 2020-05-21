@@ -181,12 +181,15 @@ def GetUsersGroups(UserId):
         UserGroups.append(item[0])
     return UserGroups
 def GetGroupNames(Groups):
-    Names = []
-    params ={"Groups":tuple(Groups)}
-    SQLcursor.execute("SELECT \"GroupName\" FROM \"Groups\" WHERE \"GroupId\" in %(Groups)s",params)
-    for item in SQLcursor.fetchall():
-        Names.append(item[0])
-    return Names
+    if len(Groups)>0:
+        Names = []
+        params ={"Groups":tuple(Groups)}
+        SQLcursor.execute("SELECT \"GroupName\" FROM \"Groups\" WHERE \"GroupId\" in %(Groups)s",params)
+        for item in SQLcursor.fetchall():
+            Names.append(item[0])
+        return Names
+    else:
+        return ["You Are Not In Any Groups At This Point"]
 def GroupLocked(GroupId):#check if group is locked
     params = {"GroupId":tuple([GroupId])}
     print(SQLcursor.execute("SELECT \"Locked\" FROM \"Groups\" WHERE \"GroupId\" in %(GroupId)s",params))
