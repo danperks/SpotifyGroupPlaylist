@@ -2,22 +2,30 @@
 <html>
 <head>
     <title>Spotify Group Bangers</title>
+    <meta name="viewport" content="width=device-width, initial-scale=0.8"> 
     <link rel="stylesheet" type="text/css" href="../static/main.css">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script> 
         
 </head>
 <body class="central-y-child">
-    <div class="container" style="margin-bottom: 4em;">
-    <img id="AlbumCover"></img>
+    <div class="song container">
+        <img id="AlbumCover" style="height:25em;width: 25em;"></img>
+        <div class="song-preview">
+
+        </div>
+        <div class="song-details">
+            <span id = "Artist" class="artist"></span>
+            <span id = "Title" class="title"></span>
+        </div>
+        <div class="song-vote">
+            <button id = "InFavourButton" onclick = "VoteInFavour()" disabled = "disabled">Banger</button>
+            <button id = "AgainstButton" onclick = "VoteAgainst()"  disabled = "disabled">Dud</button>
+        </div>
     </div>
-    <a id = "Artist"></a>
-    <a id = "Title"></a>
-    <button id = "InFavourButton" onclick = "VoteInFavour()" disabled = "disabled">Banger</button>
-    <button id = "AgainstButton" onclick = "VoteAgainst()"  disabled = "disabled">Dud</button>
     
 </body>
 <script src="https://cdn.jsdelivr.net/npm/js-cookie@rc/dist/js.cookie.min.js"></script>
-<script src="/static/VotingPage.js"></script>
+<script src="/static/VotingPage.js"></script>  
         
     
 
