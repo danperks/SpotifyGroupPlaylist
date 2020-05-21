@@ -1,4 +1,3 @@
-import cookies from 'js-cookie';
 "use strict";
 //jslint browser:true //
 
@@ -8,16 +7,13 @@ var VotesAgainst = [];
 var CurrentSong = "";
 
 
-var script = document.createElement('script');
-script.src = 'https://code.jquery.com/jquery-3.4.1.min.js';
-script.type = 'text/javascript';
-document.getElementsByTagName('head')[0].appendChild(script);
+
 
 
 $(document).ready(function() {
     $.get('/ReturnSongsAwaitVote',{GroupId:"J9r9J30pwi"}).done(function(data){
         SongsToVoteOn= data;
-        alert(SongsToVoteOn)
+        //alert(SongsToVoteOn)
         NextSong();
                 //console.log(SongsToVoteOn);
                 
@@ -26,9 +22,6 @@ $(document).ready(function() {
 });
 
 function MakeButtonsLive(){//probably should mess around with doing this propelry off a chain of promises / async funcitons etc, but acc that seems to work so , even if sketchy
-    console.log(SongsToVoteOn)
-    
-    console.log(CurrentSong)
     if (SongsToVoteOn.length >0){
         $("#AgainstButton").prop("disabled", false);
         $("#InFavourButton").prop("disabled", false);
@@ -39,7 +32,7 @@ function MakeButtonsLive(){//probably should mess around with doing this propelr
 }
 
 function VoteInFavour(){
-    alert("Vote In Favour" + CurrentSong);
+    //alert("Vote In Favour" + CurrentSong);
     VotesInFavour.push(CurrentSong);
     NextSong();
     
@@ -48,7 +41,7 @@ function VoteInFavour(){
 
 function VoteAgainst(){
     
-    alert("Vote Against" + CurrentSong);
+    //alert("Vote Against" + CurrentSong);
     VotesAgainst.push(CurrentSong);
     NextSong();
 }
@@ -72,7 +65,9 @@ function SetAlbumImage(SongID){
             'Authorization': 'Bearer ' + String(Cookies.get("AuthToken")),
         },
         success:function(response){
-            console.log(response)
+            document.getElementById("AlbumCover").src = response["album"]["images"][0]["url"];
+            document.getElementById("Artist").innerHTML = response["artists"][0]["name"];// will only get first artist but you know where to go with that
+            document.getElementById("Title").innerHTML = response["name"]
         }
 
     })
