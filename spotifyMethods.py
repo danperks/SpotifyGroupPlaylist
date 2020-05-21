@@ -17,7 +17,7 @@ def ApplicationVerification():#https://developer.spotify.com/documentation/gener
 
 def GetAuthoristaionToken(AppVerificationToken): 
     #current understanding is on user authorisation i receive a code , i then send this off to /api/token as a post request to get the code proper
-   # print(AppVerificationToken)
+    
     bodyParameters = {
         "grant_type":"authorization_code",
         "code":AppVerificationToken,
@@ -29,6 +29,7 @@ def GetAuthoristaionToken(AppVerificationToken):
 
     #}
     #print("https://accounts.spotify.com/api/token?"+str(urllib.parse.urlencode(bodyParameters)))
+    #print(requests.post("https://accounts.spotify.com/api/token",bodyParameters).json())
     return requests.post("https://accounts.spotify.com/api/token",bodyParameters).json()
 
 def RefreshAccessToken(RefreshToken):

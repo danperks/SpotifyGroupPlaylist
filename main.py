@@ -11,6 +11,7 @@ from flask import send_from_directory
 from flask import url_for
 from flask import jsonify
 from flask import escape
+from flask import session
 from spotifyMethods import *
 from config import *
 import random
@@ -21,6 +22,7 @@ import secrets
 app = Flask(__name__)
 app.static_folder = "static"
 app.template_folder = "templates"
+app.config["SECRET_KEY"] = SECRET_KEY
 conn = psycopg2.connect(host = DatabaseHost,database = Database,user = DatabaseUser,password= DatabasePassword)
 SQLcursor = conn.cursor()
 ## go environment varible for user and password , will do for now
@@ -29,6 +31,7 @@ SQLcursor = conn.cursor()
 @app.route("/CreateGroup",methods=["GET"])
 def CreateGroup():
     UserID = GetUserIDFromRefreshToken(str(request.cookies["RefreshToken"]))
+    
     return CreateNewGroup(UserID)[1]
 @app.route("/SpotifyCallback")
 
@@ -37,11 +40,12 @@ def SpotifyCallBack(): # Spotify Logins in the user, user redirected to the grou
     if userReturnedCode == "access_denied":
         print("ERROR : User Denies access ")
         return render_template("index.html")
-    AuthToken = GetAuthoristaionToken(str(userReturnedCode))
+    AuthToken = GetAuthoristaionToken(userReturnedCode)
+    
     RefreshToken = AuthToken["refresh_token"]#tokens expire after one hour
     resp = make_response(render_template("Login.html"))
     resp.set_cookie("RefreshToken",RefreshToken)
-    resp.set_cookie("AuthToken",AuthToken)
+    resp.set_cookie("AuthToken",AuthToken["access_token"])
     AddUserToDatabase(RefreshToken)
     return resp
     
@@ -65,6 +69,7 @@ def LoadIntoGroup():
     UserID = GetUserIDFromRefreshToken(str(request.cookies["RefreshToken"]))
     if DoesGroupExist(GroupID) == True:
         if AddUserToGroup(UserID,GroupID):
+            session["CurrentGroup"] = GroupID
             return render_template("VotingPage.html")
     return "s"
 @app.route("/SpotifyAuthorise") #Create a check to see if user is already registed, if they are then we need to call a refresh token rather than a new one
@@ -132,6 +137,8 @@ def AddUserToGroup(UserId,GroupId):## Adds user to group membership , creates re
                 SQLcursor.execute("INSERT INTO public.\"Memberships\"(\"GroupId\", \"UserId\") VALUES (%(GroupId)s, %(UserId)s);",params)
                 conn.commit();
                 return True
+        else:
+            return True
     else:
         ## return an error to display - that the group does not exist - force user to enter new group
         return False
@@ -152,7 +159,7 @@ def CreateNewGroup(UserId):
     return (True,GroupId)
 
 def AddUserToDatabase(refresh_token):
-    UserID = GetUserID(RefreshAccessToken(refresh_token)["access_token"])
+    UserID = GetUserID((RefreshAccessToken(refresh_token)))
     params = {'UserID':tuple([UserID]),'Refresh_Token':tuple([refresh_token])}
     SQLcursor.execute("INSERT INTO public.\"Users\"(\"UserId\", \"RefreshToken\") VALUES (%(UserID)s,%(Refresh_Token)s);",params)
     conn.commit()
@@ -248,3 +255,4 @@ if __name__ == "__main__":
     debug = True
     port = int(os.environ.get("PORT",5000))
     app.run(host= '0.0.0.0',port=port,debug=debug)
+    

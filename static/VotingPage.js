@@ -16,7 +16,7 @@ $(document).ready(function() {
         //alert(SongsToVoteOn)
         NextSong();
                 //console.log(SongsToVoteOn);
-                
+        
         MakeButtonsLive();
     });
 });
@@ -25,7 +25,7 @@ function MakeButtonsLive(){//probably should mess around with doing this propelr
     if (SongsToVoteOn.length >0){
         $("#AgainstButton").prop("disabled", false);
         $("#InFavourButton").prop("disabled", false);
-        
+        alert(sessionStorage.getItem("CurrentGroup"));
         CurrentSong = SongsToVoteOn[0];
         //console.log(CurrentSong)
     }
