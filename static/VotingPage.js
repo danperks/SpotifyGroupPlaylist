@@ -40,7 +40,6 @@ function VoteInFavour(){
 
 
 function VoteAgainst(){
-    
     //alert("Vote Against" + CurrentSong);
     VotesAgainst.push(CurrentSong);
     NextSong();
@@ -68,6 +67,7 @@ function SetAlbumImage(SongID){
             document.getElementById("AlbumCover").src = response["album"]["images"][0]["url"];
             document.getElementById("Artist").innerHTML = response["artists"][0]["name"];// will only get first artist but you know where to go with that
             document.getElementById("Title").innerHTML = response["name"]
+            alert(Cookies.get("AuthToken"))
         }
 
     })
