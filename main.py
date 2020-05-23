@@ -103,9 +103,11 @@ def ReturnSongsToVoteOn():
             Songs.append(song)
     
     PreclearedSongs = IsSongInUserLibrary(Songs,AuthToken,0,49)#returns the songs that are in the usesrs library
-    print(PreclearedSongs)
+    #print("PreDeclared Songs"+str(PreclearedSongs))
+    
     #return jsonify("s")
     #print("JSON" + str(list(set(Songs).difference(set(PreclearedSongs)))))
+    Songs = list(set(Songs).difference(set(CheckIfVoteHasBeenMadePreviously(Songs,UserId,GroupId))))#Remove already voted against for that group ,or for public
     return jsonify(list(set(Songs).difference(set(PreclearedSongs)))) # sketchy , but will review later, about to have lunch, probably also should return up to json, but that can wait until after lunch
     ##Queries Submitted Playlists
     ##Gets all songs
@@ -252,7 +254,13 @@ def GetUserIDFromRefreshToken(Refresh_Token):
         print(item)
         return item[0]
 
-
+def CheckIfVoteHasBeenMadePreviously(Songs,UserId,GroupId):
+    output = []
+    params = {"SongId":tuple(Songs),"UserId":tuple([UserId]),"GroupId":tuple([GroupId])}
+    SQLcursor.execute("SELECT DISTINCT \"SongId\" FROM public.\"Songs\" WHERE \"SongId\" in %(SongId)s AND \"User\" in %(UserId)s AND \"GroupRelation\" = NULL or \"GroupRelation\" IN %(GroupId)s",params)
+    for item in SQLcursor.fetchall():
+        output.append(item[0])
+    return output
 def AddSongVote(SongId,UserId,LikedBool,GroupID):
     params = {"SongId":tuple([SongId]),"UserId":tuple([UserId]),"Liked":tuple([LikedBool]),"GroupID":tuple([GroupID])}
     SQLcursor.execute("INSERT INTO public.\"Songs\"(\"SongId\",\"User\",\"VoteInFavour\",\"GroupRelation\") VALUES (%(SongId)s,%(UserId)s,%(Liked)s,%(GroupID)s);",params)
