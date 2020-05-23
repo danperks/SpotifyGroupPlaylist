@@ -52,6 +52,7 @@ function NextSong(){
     //console.log("Next Song Called");
     if (SongsToVoteOn && SongsToVoteOn.length >0){
         CurrentSong = SongsToVoteOn.pop();
+        document.getElementById("VoteCount").innerHTML = String(SongsToVoteOn.length);
         SetAlbumImage(CurrentSong);
     }
     else{
@@ -85,6 +86,7 @@ function PackUpSendBack(){
         var GroupValueToSendBack = CurrentGroup;
     }
     console.log("Sn")
+    HideElements();
     $.get('/VotesReturned',{InFavourVotes:JSON.stringify(VotesInFavour),VotesAgainst:JSON.stringify(VotesAgainst),GroupId:GroupValueToSendBack}).done(function(data){
         alert(data);
     });
@@ -93,6 +95,10 @@ function CheckBoxStateCheck(){
     StateOfCheckbox = document.getElementById("VotesPermanent").checked;
     alert(StateOfCheckbox);
     console.log(StateOfCheckbox);
+}
+function HideElements(){
+    $('#divHide').children().hide();
+    
 }
     // Both Arrays combined into JSON String wdetailing what each array is
     //field for group added

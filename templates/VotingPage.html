@@ -8,7 +8,7 @@
         
 </head>
 <body class="central-y-child">
-    <div class="song container">
+    <div class="song container" id="divHide">
         <img id="AlbumCover" style="height:25em;width: 25em;"></img>
         <div class="song-preview">
 
@@ -20,10 +20,16 @@
         <div class="song-vote">
             <button id = "InFavourButton" onclick = "VoteInFavour()" disabled = "disabled">Banger</button>
             <button id = "AgainstButton" onclick = "VoteAgainst()"  disabled = "disabled">Dud</button>
+            
         </div>
     </div>
     <input id="VotesPermanent" type="checkbox" onclick="CheckBoxStateCheck()">
     <a> Keep My Votes Visible For All Groups</a>
+    <span>
+        <h1> Amount Of Songs Left</h1>
+        <h2 id="VoteCount"></h2>
+    </span>
+    
 </body>
 <script src="https://cdn.jsdelivr.net/npm/js-cookie@rc/dist/js.cookie.min.js"></script>
 <script src="/static/VotingPage.js"></script>  
