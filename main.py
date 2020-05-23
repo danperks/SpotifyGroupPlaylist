@@ -11,7 +11,7 @@ from flask import send_from_directory
 from flask import url_for
 from flask import jsonify
 from flask import escape
-from flask import session
+from flask import json, session
 from spotifyMethods import *
 from config import *
 import random
@@ -74,7 +74,20 @@ def LoadIntoGroup():
 @app.route("/SpotifyAuthorise") #Create a check to see if user is already registed, if they are then we need to call a refresh token rather than a new one
 def SpotifyLogIn():
         return redirect(ApplicationVerification())
-    
+@app.route("/VotesReturned",methods = ["GET"])
+def VotesReturned():
+    UserID = GetUserIDFromRefreshToken(request.cookies["RefreshToken"])
+    InFavour = json.loads(request.args["InFavourVotes"])
+    Against = json.loads(request.args["VotesAgainst"])
+    GroupID = request.args["GroupId"]
+    if GroupID == "ALL":
+        GroupID = None
+    print("GroupID" + str(GroupID))
+    for item in InFavour:
+        AddSongVote(item,UserID,True,GroupID)
+    for item in Against:
+        AddSongVote(item,UserID,False,GroupID)
+    return str(GroupID)
 @app.route("/ReturnSongsAwaitVote",methods = ["GET"])
 def ReturnSongsToVoteOn():
     #GroupId = request.form["GroupId"]
@@ -236,12 +249,13 @@ def GetUserIDFromRefreshToken(Refresh_Token):
     params = {"RefreshToken":tuple([Refresh_Token])}
     SQLcursor.execute("SELECT \"UserId\" FROM public.\"Users\" WHERE \"RefreshToken\" in %(RefreshToken)s",params)
     for item in SQLcursor.fetchall():
+        print(item)
         return item[0]
 
 
-def AddSongVote(SongId,UserId,LikedBool):
-    params = {"SongId":tuple([SongId]),"UserId":tuple([UserId]),"Liked":tuple([LikedBool])}
-    SQLcursor.execute("INSERT INTO public.\"Songs\"(\"SongId\",\"User\",\"VoteInFavour\") VALUES (%(SongId)s,%(UserId)s,%(Liked)s);",params)
+def AddSongVote(SongId,UserId,LikedBool,GroupID):
+    params = {"SongId":tuple([SongId]),"UserId":tuple([UserId]),"Liked":tuple([LikedBool]),"GroupID":tuple([GroupID])}
+    SQLcursor.execute("INSERT INTO public.\"Songs\"(\"SongId\",\"User\",\"VoteInFavour\",\"GroupRelation\") VALUES (%(SongId)s,%(UserId)s,%(Liked)s,%(GroupID)s);",params)
     conn.commit();
     return True
 ### MISC ##

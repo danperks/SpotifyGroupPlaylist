@@ -10,14 +10,17 @@ var CurrentSong = "";
 
 
 var CurrentGroup = sessionStorage.getItem("CurrentGroup");
+var StateOfCheckbox = false;
+console.log(CurrentGroup)
 $(document).ready(function() {
     $.get('/ReturnSongsAwaitVote',{GroupId:CurrentGroup}).done(function(data){
         SongsToVoteOn= data;
+        //console.log(data);
         //alert(SongsToVoteOn)
         NextSong();
                 //console.log(SongsToVoteOn);
-        
         MakeButtonsLive();
+        CheckBoxStateCheck();
     });
 });
 
@@ -47,7 +50,7 @@ function VoteAgainst(){
 }
 function NextSong(){
     //console.log("Next Song Called");
-    if (SongsToVoteOn && SongsToVoteOn.length){
+    if (SongsToVoteOn && SongsToVoteOn.length >0){
         CurrentSong = SongsToVoteOn.pop();
         SetAlbumImage(CurrentSong);
     }
@@ -75,7 +78,22 @@ function SetAlbumImage(SongID){
 }
 function PackUpSendBack(){
     alert("End Of List Reached");
-    console.log(JSON.parse(VotesInFavour));
+    if(StateOfCheckbox){
+        var GroupValueToSendBack = "ALL";
+    }
+    else{
+        var GroupValueToSendBack = CurrentGroup;
+    }
+    console.log("Sn")
+    $.get('/VotesReturned',{InFavourVotes:JSON.stringify(VotesInFavour),VotesAgainst:JSON.stringify(VotesAgainst),GroupId:GroupValueToSendBack}).done(function(data){
+        alert(data);
+    });
+}
+function CheckBoxStateCheck(){
+    StateOfCheckbox = document.getElementById("VotesPermanent").checked;
+    alert(StateOfCheckbox);
+    console.log(StateOfCheckbox);
+}
     // Both Arrays combined into JSON String wdetailing what each array is
     //field for group added
     //field for user id added
@@ -83,4 +101,3 @@ function PackUpSendBack(){
     //string unpacked on the flask
     //array of negative votes is then porcessed (simply just record each vote on the database)
     //arrray of positive votes is then done in the same manner
-}
