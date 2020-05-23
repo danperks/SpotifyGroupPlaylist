@@ -30,8 +30,8 @@ elif config == "Created":
 app = Flask(__name__)
 app.static_folder = "static"
 app.template_folder = "templates"
-app.config["SECRET_KEY"] = SECRET_KEY
-conn = psycopg2.connect(host = DatabaseHost,database = Database,user = DatabaseUser,password= DatabasePassword)
+app.config["SECRET_KEY"] = config.SecretKey
+conn = psycopg2.connect(host=config.Host, database=config.Database, user=config.User, password=config.Password)
 SQLcursor = conn.cursor()
 ## go environment varible for user and password , will do for now
 #Database

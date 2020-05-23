@@ -16,6 +16,9 @@ def __CreateConfig():
         "ClientID": "",
         "ClientSecret": ""
     }
+    __config["Other"] = {
+        "SecretKey": ""
+    }
     with open(_configPath, "w") as configfile:
         __config.write(configfile)
     
@@ -27,6 +30,8 @@ class SGPConfig():
     Password = ""
     ClientID = ""
     ClientSecret = ""
+    SecretKey = ""
+
     def __new__(self):
         try:
             c = configparser.ConfigParser()
@@ -38,6 +43,7 @@ class SGPConfig():
             self.Password =     c["PostgreSQL Database"]["Password"]
             self.ClientID =     c["Spotify API"]["ClientID"]
             self.ClientSecret = c["Spotify API"]["ClientSecret"]
+            self.SecretKey =    c["Other"]["SecretKey"]
             return self
 
         except KeyError as e:
