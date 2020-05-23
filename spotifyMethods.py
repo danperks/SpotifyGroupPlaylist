@@ -25,7 +25,7 @@ def ApplicationVerification():#https://developer.spotify.com/documentation/gener
 
 def GetAuthoristaionToken(AppVerificationToken): 
     #current understanding is on user authorisation i receive a code , i then send this off to /api/token as a post request to get the code proper
-   # print(AppVerificationToken)
+    
     bodyParameters = {
         "grant_type":"authorization_code",
         "code":AppVerificationToken,
@@ -37,6 +37,7 @@ def GetAuthoristaionToken(AppVerificationToken):
 
     #}
     #print("https://accounts.spotify.com/api/token?"+str(urllib.parse.urlencode(bodyParameters)))
+    #print(requests.post("https://accounts.spotify.com/api/token",bodyParameters).json())
     return requests.post("https://accounts.spotify.com/api/token",bodyParameters).json()
 
 def RefreshAccessToken(RefreshToken):
@@ -46,10 +47,9 @@ def RefreshAccessToken(RefreshToken):
         "client_id": config.ClientID,
         "client_secret": config.ClientSecret
     }
-    return requests.post("https://accounts.spotify.com/api/token",bodyParameters).json()
+    return requests.post("https://accounts.spotify.com/api/token",bodyParameters).json()["access_token"]
 
-#code = "AQCkFA0FSjks0q9WmXlgIhNJWi1TuSrFs7Umw5g9JgZ6_8HaDb6yx1w_sTFt4uwHx0U-tQGuZTB9pywDOarw8pvrPzSvjuk5cZRG3yqprZc_b_0xPqgOLgjE312OE6QLVh8u0ykBZy-0XtirME12sdYNs6O2EeZX2Gl2fIkDfBznDLCD8DL2rC8zeCNA8KeH29htkMNvfVWJu9Q"
-#print(RefreshAccessToken(GetAuthoristaionToken(code)["refresh_token"]))
+
 def GetUserID(UserAccessToken):
     headers = {
     "Authorization":'Bearer '+UserAccessToken,
@@ -57,7 +57,9 @@ def GetUserID(UserAccessToken):
     return requests.get('https://api.spotify.com/v1/me', headers=headers).json()["id"]
 
 
-def IsSongInUserLibrary(ListOfSpotifyID,UserAccessToken):
+def IsSongInUserLibrary(ListOfSpotifyID,UserAccessToken,start,end):
+    if start == len(ListOfSpotifyID):
+        return []
     AlreadyPresent = []
     headers = {
         "Accept": "application/json",
@@ -65,14 +67,30 @@ def IsSongInUserLibrary(ListOfSpotifyID,UserAccessToken):
         "Authorization":'Bearer '+UserAccessToken
     }
     bodyParameters={
-        "ids":ListOfSpotifyID
+        "ids":",".join(ListOfSpotifyID[start:end])
     }
+    
+    r= requests.get("https://api.spotify.com/v1/me/tracks/contains",headers=headers,params=bodyParameters)
+    print(r)
+    for item in ListOfSpotifyID[start:end]:
+       if r.json()[ListOfSpotifyID.index(item)-start] ==True:        
+            AlreadyPresent.append(item)
 
-    return requests.get("https://api.spotify.com/v1/me/tracks/contains",headers=headers,params=bodyParameters).json()
+    
+            
+    if len(ListOfSpotifyID)<=end+49:
+        AlreadyPresent=[*AlreadyPresent,*IsSongInUserLibrary(ListOfSpotifyID,UserAccessToken,end,len(ListOfSpotifyID))]
+        #print(AlreadyPresent)
+    if len(ListOfSpotifyID)>end+49:
+        #print("lower")
+        AlreadyPresent=[*AlreadyPresent,*IsSongInUserLibrary(ListOfSpotifyID,UserAccessToken,end,(end+49))]
+       # print(AlreadyPresent)
+    
+    return AlreadyPresent
     #for every 50ID's
     #send API Request
     #if true add song ID to ArrayOfUserApproved
-    return "s"
+    
 
 def GetUsersLikedSongs(UserAccessToken):#Pagination - Deprecated
     LikedSoFar = "";
@@ -96,8 +114,28 @@ def GetUsersLikedSongs(UserAccessToken):#Pagination - Deprecated
 def GetUsersPlaylists(UserAccessToken):
     return "s"
 
-def GetItemsInPlaylist(UserAccessToken):
+def GetItemsInPlaylist(PlaylistId,UserAccessToken):
+    SongIds = []
+    headers = {
+        "Accept": "application/json",
+        "Content-Type": "application/json",
+        "Authorization":'Bearer '+str(UserAccessToken)
+        
+    }
+    r = requests.get("https://api.spotify.com/v1/playlists/"+PlaylistId+"/tracks",headers=headers).json()
+    
+    for item in r["items"]:
+        SongIds.append(item["track"]["id"])
+    
+    return SongIds
+
+
+def PushToNewPlaylist(UserAccessToken,ArrayOfSongs,PlaylistId):
+    ##Takes array
+    ##spotify api -> add items to playlist
+    ##voila
     return "s"
 
-def PushToNewPlaylist(UserAccessToken,ArrayOfSongs):
-    return "s"
+
+
+

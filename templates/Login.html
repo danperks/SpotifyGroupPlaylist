@@ -2,12 +2,53 @@
 <html>
 <head>
     <title>Spotify Group Bangers</title>
-    <link rel="stylesheet" type="text/css" href="/static/css/main.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" type="text/css" href="/static/main.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script> 
 </head>
-<body>
-    <form action = "/form/EnterCode" method = "POST">
-        <input type="text" name="GroupCode" placeholder="Enter Group Code">
-    </form>
-    
+<body class="central-y-child" style="justify-content:normal">
+    <div class="group container central-y-child central-x" style="padding: 1em 0.5em">
+        <div class="logo">
+            <img class="logo" src="../static/logo.png" alt="logo" style="max-width: 15em;align-self: center;">
+        </div>
+        <div class="input">
+            <form action = "/form/EnterCode" method = "POST">
+                <input class="group-input" type="text" name="GroupCode" placeholder="Enter Group Code">
+                <button type="submit" class="group-input"> Load Into Group</button>
+                <button onclick="CreateAGroup()" class="group-input"> Create A Group</button>
+            </form>
+        </div>
+        <div class="table">
+            <table id = "GroupTable">
+                <th>Group Name</th>
+                <th>Group Id</th>
+            </table>
+        </div>
+        <div class="user-actions">
+            <button onclick="Logout()" class="logout-button">Logout</button>
+        </div>
+    </div>
 </body>
+<script>
+    function Submission(){
+        sessionStorage.setItem("CurrentGroup",document.getElementById("EnteredGroup").value);//set current group
+    }
+    $(document).ready(function(){
+        $.get("/api/UserGroups").done(function(data){
+            var table = document.getElementById("GroupTable")
+            for(i =0;i<data[0].length;i++){
+                var row = table.insertRow();
+                var cell1 = row.insertCell(0).innerHTML=data[0][i];
+                var cell2 = row.insertCell(1).innerHTML=data[1][i];
+                
+            }
+    })
+})
+
+function CreateAGroup(){
+    $.get("/CreateGroup").done(function(data){
+        alert("Your New Group is " + String(data))
+    })
+}
+</script>
 </html>
