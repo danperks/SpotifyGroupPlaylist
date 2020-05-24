@@ -41,7 +41,6 @@ def SpotifyCallBack(): # Spotify Logins in the user, user redirected to the grou
         print("ERROR : User Denies access ")
         return render_template("index.html")
     AuthToken = GetAuthoristaionToken(userReturnedCode)
-    
     RefreshToken = AuthToken["refresh_token"]#tokens expire after one hour
     resp = make_response(render_template("Login.html"))
     resp.set_cookie("RefreshToken",RefreshToken)
@@ -49,12 +48,17 @@ def SpotifyCallBack(): # Spotify Logins in the user, user redirected to the grou
     AddUserToDatabase(RefreshToken)
     return resp
     
+@app.errorhandler(KeyError)
+def IncorrectKeyError(e):
+    return jsonify(error=str(e)),440
+    
 @app.route("/")#index - start page, user asked to either authorise with spotify - or automatic forward to group entry
 def indexStart():
     if "RefreshToken" in request.cookies:
         print(request.cookies)
         print("Cookie Present")#just check for the token
-        PreviousAuthorisation = request.cookies["RefreshToken"]
+        PreviousAuthorisation = IsThisStillValid(request.cookies["RefreshToken"])
+        
         resp = make_response(render_template("Login.html"))
         print(RefreshAccessToken(PreviousAuthorisation))
         resp.set_cookie("AuthToken",RefreshAccessToken(PreviousAuthorisation))
@@ -88,6 +92,13 @@ def VotesReturned():
     for item in Against:
         AddSongVote(item,UserID,False,GroupID)
     return str(GroupID)
+
+@app.route("/AllVotesCastCheck",methods = ["GET"])
+def AllVotesCastCheck():
+    GroupID = request.args["GroupId"]
+    AuthToken = request.cookies["AuthToken"]
+    return HaveAllVotesBeenReceived(GroupID,AuthToken)
+
 @app.route("/ReturnSongsAwaitVote",methods = ["GET"])
 def ReturnSongsToVoteOn():
     #GroupId = request.form["GroupId"]
@@ -119,7 +130,10 @@ def ReturnSongsToVoteOn():
 @app.errorhandler(404)
 def page_not_found_error(e):
     return render_template("404.html"),404
-    
+
+
+def IsThisStillValid(RefreshTokenToCheck):
+    return "s"
 def GetSongs(UserId,GroupId,AuthToken):
     Playlists = ReturnGroupPropostionPlaylists(UserId,GroupId)
     Songs = []    
@@ -258,10 +272,11 @@ def ReturnGroupPropostionPlaylists(UserId,GroupId):
     return Playlists
 
 def GetUserIDFromRefreshToken(Refresh_Token):
+    SQLcursor2 = conn.cursor();
     params = {"RefreshToken":tuple([Refresh_Token])}
-    SQLcursor.execute("SELECT \"UserId\" FROM public.\"Users\" WHERE \"RefreshToken\" in %(RefreshToken)s",params)
-    for item in SQLcursor.fetchall():
-        print(item)
+    SQLcursor2.execute("SELECT \"UserId\" FROM public.\"Users\" WHERE \"RefreshToken\" in %(RefreshToken)s",params)
+    for item in SQLcursor2.fetchall():
+        print("UserID" + item[0])
         return item[0]
 
 def CheckIfVoteHasBeenMadePreviously(Songs,UserId,GroupId):
