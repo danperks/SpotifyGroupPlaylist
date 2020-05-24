@@ -16,6 +16,7 @@
                 <input class="group-input" type="text" id="EnteredGroup" name="GroupCode" placeholder="Enter Group Code">
                 <button onclick = "Submission()" type="submit" class="group-input"> Load Into Group</button>
                 <button onclick="CreateAGroup()" class="group-input"> Create A Group</button>
+                <button onclick = "SubmitAPlaylist()" class = "group-input">Submit A Playlist</button>
             </form>
         </div>
         <div class="table">
@@ -30,6 +31,9 @@
     </div>
 </body>
 <script>
+    function SubmitAPlaylist(){
+        console.log("Submit A Playlist Called")
+    }
     function Submission(){
         sessionStorage.setItem("CurrentGroup",document.getElementById("EnteredGroup").value);//set current group
     }
