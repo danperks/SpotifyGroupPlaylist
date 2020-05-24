@@ -48,6 +48,22 @@ def GetUserID(UserAccessToken):
     }
     return requests.get('https://api.spotify.com/v1/me', headers=headers).json()["id"]
 
+def OneTimeIsSongInLibrary(ListOfSpotifyID,UserAccessToken):## Same func ,but doesnt need recursin for one time thing ,about that O you know
+    headers = {
+        "Accept": "application/json",
+        "Content-Type": "application/json",
+        "Authorization":'Bearer '+UserAccessToken
+    }
+    bodyParameters={
+        "ids":",".join(ListOfSpotifyID)
+    }
+    
+    r= requests.get("https://api.spotify.com/v1/me/tracks/contains",headers=headers,params=bodyParameters)
+    for item in ListOfSpotifyID:
+        if r.json() == True:
+            return True
+        else:
+            return False
 
 def IsSongInUserLibrary(ListOfSpotifyID,UserAccessToken,start,end):
     if start == len(ListOfSpotifyID):

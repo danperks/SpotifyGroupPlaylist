@@ -119,7 +119,14 @@ def ReturnSongsToVoteOn():
 @app.errorhandler(404)
 def page_not_found_error(e):
     return render_template("404.html"),404
-
+    
+def GetSongs(UserId,GroupId,AuthToken):
+    Playlists = ReturnGroupPropostionPlaylists(UserId,GroupId)
+    Songs = []    
+    for item in Playlists:##adds all songs to the playlist
+        for song in GetItemsInPlaylist(item,AuthToken):
+            Songs.append(song)
+    return Songs
 #### Pass Data To Front ###
 
 @app.route("/api/UserGroups",methods=["GET"])
@@ -148,7 +155,10 @@ def DoesUserExist(UserId):
         return True
     else:
         return False;
-
+def GetUsersInGroup(GroupID):
+    params = {"GroupId":tuple([GroupID])}
+    SQLcursor.execute("SELECT DISTINCT \"UserId\" FROM public.\"Memberships\" WHERE \"GroupId\" in %(GroupId)s",params)
+    return [item[0] for item in SQLcursor.fetchall()]
 def AddUserToGroup(UserId,GroupId):## Adds user to group membership , creates record of memebership for that id for that user
     ##Changed Database Schema - Something slightly more normalised 
     if DoesGroupExist(GroupId):
@@ -266,9 +276,28 @@ def AddSongVote(SongId,UserId,LikedBool,GroupID):
     SQLcursor.execute("INSERT INTO public.\"Songs\"(\"SongId\",\"User\",\"VoteInFavour\",\"GroupRelation\") VALUES (%(SongId)s,%(UserId)s,%(Liked)s,%(GroupID)s);",params)
     conn.commit();
     return True
+
+def HasAVoteBeenReceived(SongId,GroupID,Users):#for each song gets the distinct votes for it, if the amount of votes is the same as users then its true
+    params = {"SongId":tuple([SongId]),"UserId":tuple(Users),"GroupId":tuple([GroupID])}
+    SQLcursor.execute("SELECT DISTINCT \"User\" FROM public.\"Songs\" WHERE \"SongId\" in %(SongId)s AND \"User\" in %(UserId)s AND \"GroupRelation\" = NULL or \"GroupRelation\" IN %(GroupId)s",params)
+    return [item for item in SQLcursor.fetchall()]#return users who have voted for that song
+
+def IsSongInPlaylistSubmitted(SongId,UserId):
+    return "s"
 ### MISC ##
 
-def HaveAllVotesBeenReceived():##plan is sketchy but it will do for now
+def HaveAllVotesBeenReceived(GroupId,AuthToken):##plan is sketchy but it will do for now
+    Songs = GetSongs("",GroupId,AuthToken)
+    Users = GetUsersInGroup(GroupId)
+    ApprovedSongs =[]
+    for Song in Songs:
+        for UserToCheck in list(set(Users).difference(HasAVoteBeenReceived(Song,GroupId,Users))):
+            if IsSongInPlaylistSubmitted(Song,UserToCheck) == False:
+                if OneTimeIsSongInLibrary(Song,AuthToken) == False:
+                    return False;
+            
+
+
     ##runs when the user reaches the end of the users stack to vote with
     ##checks every song in the group
     ##counts the amounts of votes the song has(not in favour or against just number) and records
@@ -278,7 +307,9 @@ def HaveAllVotesBeenReceived():##plan is sketchy but it will do for now
     ##once the count for all the songs is the same as the amount of users in the group , all votes have been recived
     return "s"
 
-def PlaylistOutput():
+def PlaylistOutput(GroupId,AuthToken):
+    Songs = GetSongs("",GroupId,AuthToken)
+    Users = GetUsersInGroup(GroupId)
     ##not neccessarily all in this method but the plan
     ## Get lead user ID(first in Array)
     ## get refresh token from users table
