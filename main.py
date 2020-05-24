@@ -282,19 +282,29 @@ def HasAVoteBeenReceived(SongId,GroupID,Users):#for each song gets the distinct 
     SQLcursor.execute("SELECT DISTINCT \"User\" FROM public.\"Songs\" WHERE \"SongId\" in %(SongId)s AND \"User\" in %(UserId)s AND \"GroupRelation\" = NULL or \"GroupRelation\" IN %(GroupId)s",params)
     return [item for item in SQLcursor.fetchall()]#return users who have voted for that song
 
-def IsSongInPlaylistSubmitted(SongId,UserId):
-    return "s"
+def IsSongInPlaylistSubmitted(SongId,UserId,GroupId,AuthToken):
+    Playlists = []
+    params = {"GroupId":tuple([GroupId]),"UserId":tuple([UserId])}
+    SQLcursor.execute("SELECT \"PlaylistId\" FROM \"PlaylistSubmission\" WHERE \"GroupRelation\" in %(GroupId)s AND \"UserId\" in %(UserId)s",params)
+    for item in SQLcursor.fetchall():
+        Playlists.append(item[0])  
+    for item in Playlists:##adds all songs to the playlist
+        for song in GetItemsInPlaylist(item,AuthToken):
+            if song == SongId:
+                return True
+    
+    return False
 ### MISC ##
 
 def HaveAllVotesBeenReceived(GroupId,AuthToken):##plan is sketchy but it will do for now
     Songs = GetSongs("",GroupId,AuthToken)
     Users = GetUsersInGroup(GroupId)
-    ApprovedSongs =[]
     for Song in Songs:
         for UserToCheck in list(set(Users).difference(HasAVoteBeenReceived(Song,GroupId,Users))):
             if IsSongInPlaylistSubmitted(Song,UserToCheck) == False:
                 if OneTimeIsSongInLibrary(Song,AuthToken) == False:
-                    return False;
+                    return False
+    return True
             
 
 
