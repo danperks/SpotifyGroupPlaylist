@@ -31,10 +31,9 @@ SQLcursor = conn.cursor()
 @app.route("/CreateGroup",methods=["GET"])
 def CreateGroup():
     UserID = GetUserIDFromRefreshToken(str(request.cookies["RefreshToken"]))
-    
     return CreateNewGroup(UserID)[1]
-@app.route("/SpotifyCallback")
 
+@app.route("/SpotifyCallback")
 def SpotifyCallBack(): # Spotify Logins in the user, user redirected to the group entry page
     userReturnedCode = request.args["code"]
     if userReturnedCode == "access_denied":
@@ -42,7 +41,8 @@ def SpotifyCallBack(): # Spotify Logins in the user, user redirected to the grou
         return render_template("index.html")
     AuthToken = GetAuthoristaionToken(userReturnedCode)
     
-    RefreshToken = AuthToken["refresh_token"]#tokens expire after one hour
+    #Normally we expect an error, 
+    RefreshToken = AuthToken["refresh_token"] #tokens expire after one hour
     resp = make_response(render_template("Login.html"))
     resp.set_cookie("RefreshToken",RefreshToken)
     resp.set_cookie("AuthToken",AuthToken["access_token"])
@@ -71,9 +71,11 @@ def LoadIntoGroup():
         if AddUserToGroup(UserID,GroupID):
             return render_template("VotingPage.html")
     return "s"
+
 @app.route("/SpotifyAuthorise") #Create a check to see if user is already registed, if they are then we need to call a refresh token rather than a new one
 def SpotifyLogIn():
         return redirect(ApplicationVerification())
+
 @app.route("/VotesReturned",methods = ["GET"])
 def VotesReturned():
     UserID = GetUserIDFromRefreshToken(request.cookies["RefreshToken"])
@@ -88,6 +90,7 @@ def VotesReturned():
     for item in Against:
         AddSongVote(item,UserID,False,GroupID)
     return str(GroupID)
+
 @app.route("/ReturnSongsAwaitVote",methods = ["GET"])
 def ReturnSongsToVoteOn():
     #GroupId = request.form["GroupId"]
@@ -127,6 +130,7 @@ def GetSongs(UserId,GroupId,AuthToken):
         for song in GetItemsInPlaylist(item,AuthToken):
             Songs.append(song)
     return Songs
+
 #### Pass Data To Front ###
 
 @app.route("/api/UserGroups",methods=["GET"])
@@ -137,8 +141,6 @@ def ReturnUserGroups():
     Names = GetGroupNames(Groups)
     return jsonify(Groups,Names)
     
-
-
 ###### DATABASE METHODS ####
 
 def DoesGroupExist(GroupId):
@@ -148,6 +150,7 @@ def DoesGroupExist(GroupId):
         return True
     else:
         return False;## use to determine if ID unique, yes can be done easily with a postgres func but this is easier to build around for now
+
 def DoesUserExist(UserId):
     params = {'g':tuple([UserId])}
     SQLcursor.execute("SELECT \"UserId\" from public.\"Users\" WHERE \"UserId\" in %(g)s ",params)
@@ -159,6 +162,7 @@ def GetUsersInGroup(GroupID):
     params = {"GroupId":tuple([GroupID])}
     SQLcursor.execute("SELECT DISTINCT \"UserId\" FROM public.\"Memberships\" WHERE \"GroupId\" in %(GroupId)s",params)
     return [item[0] for item in SQLcursor.fetchall()]
+
 def AddUserToGroup(UserId,GroupId):## Adds user to group membership , creates record of memebership for that id for that user
     ##Changed Database Schema - Something slightly more normalised 
     if DoesGroupExist(GroupId):
@@ -200,11 +204,13 @@ def AddUserToDatabase(refresh_token):
     else:
         return True;
     return "s"
+
 def IsUserInGroup(UserID,GroupID):
     if GroupID in GetUsersGroups(UserID):
         return True
     else:
         return False
+
 def RemoveUserFromGroup(UserId,GroupId):#reverse of add pretty much - not convinced on usage but will make anyway
     if DoesGroupExist(GroupId):
         params = {"UserId":tuple([UserId]),"GroupId":tuple([GroupId])}
@@ -213,6 +219,7 @@ def RemoveUserFromGroup(UserId,GroupId):#reverse of add pretty much - not convin
         return True;
     else:
         return False;
+
 def GetUsersGroups(UserId):
     UserGroups = []
     params = {"UserId":tuple([UserId])}
@@ -220,6 +227,7 @@ def GetUsersGroups(UserId):
     for item in SQLcursor.fetchall():
         UserGroups.append(item[0])
     return UserGroups
+
 def GetGroupNames(Groups):
     if len(Groups)>0:
         Names = []
@@ -230,15 +238,18 @@ def GetGroupNames(Groups):
         return Names
     else:
         return ["You Are Not In Any Groups At This Point"]
+
 def GroupLocked(GroupId):#check if group is locked
     params = {"GroupId":tuple([GroupId])}
     print(SQLcursor.execute("SELECT \"Locked\" FROM \"Groups\" WHERE \"GroupId\" in %(GroupId)s",params))
     return SQLcursor.fetchall()[0][0]
+
 def AddOutputPlaylist(PlaylistUrl,GroupId):
     params = {"Playlist":tuple([PlaylistUrl]),"GroupId":tuple([GroupId])}#maybe change that to playlist id - idk , see what happens
     SQLcursor.execute("UPDATE public.\"Groups\" SET \"Output\" = %(Playlist)s WHERE \"GroupId\" in %(GroupId)s ;",params)
     conn.commit();
     return True
+
 def UserPlaylistSubmit(PlaylistId,UserId,GroupId):
     params = {"Playlist":tuple([PlaylistId]),"GroupId":tuple([GroupId]),"UserId":tuple([UserId])}
     SQLcursor.execute("INSERT INTO public.\"PlaylistSubmission\"(\"UserId\",\"PlaylistId\",\"GroupRelation\") VALUES (%(UserId)s,%(Playlist)s,%(GroupId)s);",params)
@@ -271,6 +282,7 @@ def CheckIfVoteHasBeenMadePreviously(Songs,UserId,GroupId):
     for item in SQLcursor.fetchall():
         output.append(item[0])
     return output
+
 def AddSongVote(SongId,UserId,LikedBool,GroupID):
     params = {"SongId":tuple([SongId]),"UserId":tuple([UserId]),"Liked":tuple([LikedBool]),"GroupID":tuple([GroupID])}
     SQLcursor.execute("INSERT INTO public.\"Songs\"(\"SongId\",\"User\",\"VoteInFavour\",\"GroupRelation\") VALUES (%(SongId)s,%(UserId)s,%(Liked)s,%(GroupID)s);",params)
