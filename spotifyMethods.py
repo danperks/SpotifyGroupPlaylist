@@ -13,11 +13,8 @@ def ApplicationVerification():#https://developer.spotify.com/documentation/gener
     #print("https://accounts.spotify.com/authorize?"+for)
     return ("https://accounts.spotify.com/authorize?" + str(urllib.parse.urlencode(auth_parameters)))
     
-
-
 def GetAuthoristaionToken(AppVerificationToken): 
     #current understanding is on user authorisation i receive a code , i then send this off to /api/token as a post request to get the code proper
-    
     bodyParameters = {
         "grant_type":"authorization_code",
         "code":AppVerificationToken,
@@ -26,7 +23,6 @@ def GetAuthoristaionToken(AppVerificationToken):
         "client_secret":ClientSecret      
     }
     ##headerParameters = { think it might want client id and secret base 64 but the api docs imply it wil take it in the body ,not convinced but here we go
-
     #}
     #print("https://accounts.spotify.com/api/token?"+str(urllib.parse.urlencode(bodyParameters)))
     #print(requests.post("https://accounts.spotify.com/api/token",bodyParameters).json())
@@ -40,7 +36,6 @@ def RefreshAccessToken(RefreshToken):
         "client_secret":ClientSecret
     }
     return requests.post("https://accounts.spotify.com/api/token",bodyParameters).json()["access_token"]
-
 
 def GetUserID(UserAccessToken):
     headers = {
@@ -83,8 +78,6 @@ def IsSongInUserLibrary(ListOfSpotifyID,UserAccessToken,start,end):
     for item in ListOfSpotifyID[start:end]:
        if r.json()[ListOfSpotifyID.index(item)-start] ==True:        
             AlreadyPresent.append(item)
-
-    
             
     if len(ListOfSpotifyID)<=end+49:
         AlreadyPresent=[*AlreadyPresent,*IsSongInUserLibrary(ListOfSpotifyID,UserAccessToken,end,len(ListOfSpotifyID))]
@@ -143,7 +136,3 @@ def PushToNewPlaylist(UserAccessToken,ArrayOfSongs,PlaylistId):
     ##spotify api -> add items to playlist
     ##voila
     return "s"
-
-
-
-

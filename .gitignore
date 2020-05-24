@@ -1,5 +1,5 @@
-
-.vscode/settings.json
+.vscode/
+*.code-workspace
 __pycache__/
 DatabaseTesting.py
 config.py
