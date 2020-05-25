@@ -79,6 +79,7 @@ def AbandonGroup():
     GroupCode = request.args["GroupCode"]
     if GroupCode:
         RemoveUserFromGroup(UserID,GroupCode)
+    return "True"
 @app.route("/SpotifyAuthorise") #Create a check to see if user is already registed, if they are then we need to call a refresh token rather than a new one
 def SpotifyLogIn():
         return redirect(ApplicationVerification())
@@ -275,16 +276,18 @@ def RemoveUserFromGroup(UserId,GroupId):#reverse of add pretty much - not convin
     try:
         if DoesGroupExist(GroupId):
             if IsUserLeadUser(UserId,GroupId):
-                if SetNewLeadUser(UserId,GroupId):
-                    params = {"UserId":tuple([UserId]),"GroupId":tuple([GroupId])}
-                    SQLcursor.execute("DELETE FROM public.\"Memberships\" WHERE (\"GroupId\", \"UserId\") = (%(GroupId)s, %(UserId)s);",params)
-                    conn.commit();
-                    return True
+                if SetNewLeadUser(UserId,GroupId) == False:
+                    return "False"
+            params = {"UserId":tuple([UserId]),"GroupId":tuple([GroupId])}
+            SQLcursor.execute("DELETE FROM public.\"Memberships\" WHERE (\"GroupId\", \"UserId\") = (%(GroupId)s, %(UserId)s);",params)
+            conn.commit();
+            return "True"
         else:
-            return False;
+            return "False";
     except:
+        print("ERROR : Database Rolled Back")
         DatabaseRollback()
-        return render_template("index.html")
+        return render_template("/index.html")
 
 def SetNewLeadUser(UserIdToDelete,GroupId):
     try:
