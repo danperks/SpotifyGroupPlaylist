@@ -73,7 +73,12 @@ def LoadIntoGroup():
         if AddUserToGroup(UserID,GroupID):
             return render_template("VotingPage.html")
     return "s"
-
+@app.route("/Management/AbandonGroup",methods = ["GET"])
+def AbandonGroup():
+    UserID = GetUserIDFromRefreshToken(str(request.cookies["RefreshToken"]))
+    GroupCode = request.args["GroupCode"]
+    if GroupCode:
+        RemoveUserFromGroup(UserID,GroupCode)
 @app.route("/SpotifyAuthorise") #Create a check to see if user is already registed, if they are then we need to call a refresh token rather than a new one
 def SpotifyLogIn():
         return redirect(ApplicationVerification())
@@ -237,13 +242,32 @@ def IsUserInGroup(UserID,GroupID):
 
 def RemoveUserFromGroup(UserId,GroupId):#reverse of add pretty much - not convinced on usage but will make anyway
     if DoesGroupExist(GroupId):
-        params = {"UserId":tuple([UserId]),"GroupId":tuple([GroupId])}
-        SQLcursor.execute("DELETE FROM public.\"Memberships\" WHERE (\"GroupId\", \"UserId\") = (%(GroupId)s, %(UserId)s);",params)
-        conn.commit();
-        return True;
+        if IsUserLeadUser(UserId,GroupId):
+            if SetNewLeadUser(UserId,GroupId):
+                params = {"UserId":tuple([UserId]),"GroupId":tuple([GroupId])}
+                SQLcursor.execute("DELETE FROM public.\"Memberships\" WHERE (\"GroupId\", \"UserId\") = (%(GroupId)s, %(UserId)s);",params)
+                conn.commit();
+                return True
     else:
         return False;
 
+def SetNewLeadUser(UserIdToDelete,GroupId):
+    params = {"UserId":tuple([UserIdToDelete]),"GroupId":tuple([GroupId])}
+    SQLcursor.execute("SELECT \"UserId\" FROM public.\"Memberships\" WHERE \"GroupId\" IN %(GroupId)s AND \"UserId\" NOT IN %(UserId)s",params)
+    NewUserId = SQLcursor.fetchone()[0]
+    if NewUserId == None:
+        return False
+    else:
+        params["NewUserLead"] = tuple([NewUserId])## not so sure about this 
+        SQLcursor.execute("UPDATE public.\"Groups\" SET \"LeadUser\" = %(NewUserLead)s WHERE \"GroupId\" IN %(GroupId)s",params)
+        conn.commit()
+def IsUserLeadUser(UserId,GroupId):
+    params = {"GroupId":tuple([GroupId])}
+    SQLcursor.execute("SELECT \"LeadUser\" FROM public.\"Groups\" WHERE \"GroupId\" IN %(GroupId)s",params)
+    if (SQLcursor.fetchone()[0]) == UserId:
+        return True
+    else:
+        return False
 def GetUsersGroups(UserId):
     UserGroups = []
     params = {"UserId":tuple([UserId])}
@@ -323,16 +347,27 @@ def HasAVoteBeenReceived(SongId,GroupID,Users):#for each song gets the distinct 
 
 def IsSongInPlaylistSubmitted(SongId,UserId,GroupId,AuthToken):
     Playlists = []
-    params = {"GroupId":tuple([GroupId]),"UserId":tuple([UserId])}
-    SQLcursor.execute("SELECT \"PlaylistId\" FROM \"PlaylistSubmission\" WHERE \"GroupRelation\" in %(GroupId)s AND \"UserId\" in %(UserId)s",params)
-    for item in SQLcursor.fetchall():
-        Playlists.append(item[0])  
-    for item in Playlists:##adds all songs to the playlist
-        for song in GetItemsInPlaylist(item,AuthToken):
-            if song == SongId:
-                return True
+    try:
+        params = {"GroupId":tuple([GroupId]),"UserId":tuple([UserId])}
+        SQLcursor.execute("SELECT \"PlaylistId\" FROM \"PlaylistSubmission\" WHERE \"GroupRelation\" in %(GroupId)s AND \"UserId\" in %(UserId)s",params)
+        for item in SQLcursor.fetchall():
+            Playlists.append(item[0])  
+        for item in Playlists:##adds all songs to the playlist
+            for song in GetItemsInPlaylist(item,AuthToken):
+                if song == SongId:
+                    return True
+    except:
+        DatabaseRollback()
+
     
     return False
+
+### Meta as in the other meta##
+def DatabaseRollback():
+    curs = conn.cursor()
+    curs.execute("ROLLBACK")
+    conn.commit()
+
 ### MISC ##
 
 def HaveAllVotesBeenReceived(GroupId,AuthToken):##plan is sketchy but it will do for now
