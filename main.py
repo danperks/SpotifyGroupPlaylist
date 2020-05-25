@@ -43,8 +43,9 @@ def SpotifyCallBack(): # Spotify Logins in the user, user redirected to the grou
     RefreshToken = AuthToken["refresh_token"]#tokens expire after one hour
     resp = make_response(render_template("Login.html"))
     resp.set_cookie("RefreshToken",RefreshToken)
+    resp.set_cookie("UserId",GetUserID(AuthToken["access_token"]))
     resp.set_cookie("AuthToken",AuthToken["access_token"])
-    AddUserToDatabase(RefreshToken)
+    AddUpdateUserRefreshToken(GetUserID(AuthToken["access_token"]),RefreshToken)##Used to add a new user to the database
     return resp
     
 @app.errorhandler(KeyError)
@@ -56,10 +57,8 @@ def indexStart():
     if "RefreshToken" in request.cookies:
         print(request.cookies)
         print("Cookie Present")#just check for the token
-        PreviousAuthorisation = IsThisStillValid(request.cookies["RefreshToken"])
-        
+        PreviousAuthorisation = IsThisStillValid(request.cookies["RefreshToken"])        
         resp = make_response(render_template("Login.html"))
-        print(RefreshAccessToken(PreviousAuthorisation))
         resp.set_cookie("AuthToken",RefreshAccessToken(PreviousAuthorisation))
         return resp
     else:
@@ -134,7 +133,12 @@ def page_not_found_error(e):
 
 
 def IsThisStillValid(RefreshTokenToCheck):
-    return "s"
+    try:
+        GetUserIDFromRefreshToken(RefreshTokenToCheck)
+        return RefreshTokenToCheck
+    except KeyError:
+        return render_template("index.html")
+    
 def GetSongs(UserId,GroupId,AuthToken):
     Playlists = ReturnGroupPropostionPlaylists(UserId,GroupId)
     Songs = []    
@@ -174,7 +178,11 @@ def GetUsersInGroup(GroupID):
     params = {"GroupId":tuple([GroupID])}
     SQLcursor.execute("SELECT DISTINCT \"UserId\" FROM public.\"Memberships\" WHERE \"GroupId\" in %(GroupId)s",params)
     return [item[0] for item in SQLcursor.fetchall()]
-
+def AddUpdateUserRefreshToken(UserId,RefreshToken): ## Name could do with rectification 
+    params = {"UserId":tuple([UserId]),"RefreshToken":tuple([RefreshToken])}
+    SQLcursor.execute("INSERT INTO public.\"Users\"(\"UserId\",\"RefreshToken\") VALUES (%(UserId)s,%(RefreshToken)s) ON CONFLICT (\"UserId\") DO UPDATE SET \"RefreshToken\" = %(RefreshToken)s RETURNING \"RefreshToken\" ",params)
+    conn.commit()
+    return "s"
 def AddUserToGroup(UserId,GroupId):## Adds user to group membership , creates record of memebership for that id for that user
     ##Changed Database Schema - Something slightly more normalised 
     if DoesGroupExist(GroupId):
@@ -206,10 +214,10 @@ def CreateNewGroup(UserId):
     AddUserToGroup(UserID,GroupId)
     return (True,GroupId)
 
-def AddUserToDatabase(refresh_token):
-    if DoesUserExist == False:
-        UserID = GetUserID((RefreshAccessToken(refresh_token)))
-        params = {'UserID':tuple([UserID]),'Refresh_Token':tuple([refresh_token])}
+def AddUserToDatabase(refresh_token): ## Deprecated - In Favour of Update Refresh Token - Insert on Conflict
+    UserId = GetUserID((RefreshAccessToken(refresh_token)))
+    if DoesUserExist(UserId) == False:        
+        params = {'UserID':tuple([UserId]),'Refresh_Token':tuple([refresh_token])}
         SQLcursor.execute("INSERT INTO public.\"Users\"(\"UserId\", \"RefreshToken\") VALUES (%(UserID)s,%(Refresh_Token)s);",params)
         conn.commit()
         return True;
