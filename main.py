@@ -241,9 +241,11 @@ def CreateNewGroup(UserId):
         params = {'GroupId':tuple([GroupId]),'Users':tuple([UserID]),"Name":tuple([Name]),"Output":tuple([CreateGroupPlaylist(UserId,str(Name),request.cookies["AuthToken"],str(UserId))])}
         SQLcursor.execute("INSERT INTO public.\"Groups\"(\"GroupId\",\"Output\",\"LeadUser\",\"GroupName\") VALUES (%(GroupId)s,%(Output)s,%(Users)s,%(Name)s);",params)
         conn.commit()
+        print("Group Created")
         AddUserToGroup(UserID,GroupId)
         return (True,GroupId)
-    except:
+    except Exception as e:
+        print(e)
         DatabaseRollback()
         return render_template("index.html")
 
@@ -300,6 +302,11 @@ def SetNewLeadUser(UserIdToDelete,GroupId):
             params["NewUserLead"] = tuple([NewUserId])## not so sure about this 
             SQLcursor.execute("UPDATE public.\"Groups\" SET \"LeadUser\" = %(NewUserLead)s WHERE \"GroupId\" IN %(GroupId)s",params)
             conn.commit()
+            ##Get the access token for the replacment user
+            SQLcursor2 = conn.cursor()
+            SQLcursor2.execute("SELECT \"RefreshToken\" FROM public.\"Users\" WHERE \"UserId\" IN %(NewUserLead)s",params)
+            AccessToken = RefreshAccessToken(SQLcursor2.fetchall()[0][0])
+            AddOutputPlaylist(CreateGroupPlaylist(NewUserId,str(NewUserId)+"'s New Group",AccessToken,"Group Playlist"),GroupId)
             return True
     except:
         DatabaseRollback()
