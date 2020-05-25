@@ -35,18 +35,33 @@ function MakeButtonsLive(){//probably should mess around with doing this propelr
 }
 
 function VoteInFavour(){
-    //alert("Vote In Favour" + CurrentSong);
-    VotesInFavour.push(CurrentSong);
-    NextSong();
+    if(StateOfCheckbox){
+        var GroupValueToSendBack = "ALL";
+    }
+    else{
+        var GroupValueToSendBack = CurrentGroup;
+    }
+    console.log("Current Votes Applicable To " + GroupValueToSendBack.toString())
+    $.get('/VotesReturned',{InFavourVotes:JSON.stringify([CurrentSong]),GroupId:GroupValueToSendBack}).done(function(data){
+        NextSong();
+    })
+}
 
     
-}
+
 
 
 function VoteAgainst(){
-    //alert("Vote Against" + CurrentSong);
-    VotesAgainst.push(CurrentSong);
-    NextSong();
+    if(StateOfCheckbox){
+        var GroupValueToSendBack = "ALL";
+    }
+    else{
+        var GroupValueToSendBack = CurrentGroup;
+    }
+    console.log("Current Votes Applicable To " + GroupValueToSendBack.toString())
+    $.get('/VotesReturned',{VotesAgainst:JSON.stringify([CurrentSong]),GroupId:GroupValueToSendBack}).done(function(data){
+        NextSong();
+    })
 }
 function NextSong(){
     //console.log("Next Song Called");
@@ -79,17 +94,8 @@ function SetAlbumImage(SongID){
 }
 function PackUpSendBack(){
     alert("End Of List Reached");
-    if(StateOfCheckbox){
-        var GroupValueToSendBack = "ALL";
-    }
-    else{
-        var GroupValueToSendBack = CurrentGroup;
-    }
-    console.log("Sn")
     HideElements();
-    $.get('/VotesReturned',{InFavourVotes:JSON.stringify(VotesInFavour),VotesAgainst:JSON.stringify(VotesAgainst),GroupId:GroupValueToSendBack}).done(function(data){
-        alert(data);
-    });
+    // add the check to see if all votes have been received 
 }
 function CheckBoxStateCheck(){
     StateOfCheckbox = document.getElementById("VotesPermanent").checked;

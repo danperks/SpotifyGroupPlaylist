@@ -79,18 +79,20 @@ def SpotifyLogIn():
         return redirect(ApplicationVerification())
 
 @app.route("/VotesReturned",methods = ["GET"])
-def VotesReturned():
+def VotesReturned():## function originally designed to process all votes at once, but doign one individually will work , not a big enough priority to refine further
     UserID = GetUserIDFromRefreshToken(request.cookies["RefreshToken"])
-    InFavour = json.loads(request.args["InFavourVotes"])
-    Against = json.loads(request.args["VotesAgainst"])
+    InFavour = request.args.get("InFavourVotes",None)
+    Against = request.args.get("VotesAgainst",None)
     GroupID = request.args["GroupId"]
     if GroupID == "ALL":
         GroupID = None
     print("GroupID" + str(GroupID))
-    for item in InFavour:
-        AddSongVote(item,UserID,True,GroupID)
-    for item in Against:
-        AddSongVote(item,UserID,False,GroupID)
+    if InFavour:
+        for item in json.loads(InFavour):
+            AddSongVote(item,UserID,True,GroupID)
+    if Against:
+        for item in json.loads(Against):
+            AddSongVote(item,UserID,False,GroupID)
     return str(GroupID)
 
 @app.route("/AllVotesCastCheck",methods = ["GET"])
