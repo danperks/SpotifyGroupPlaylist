@@ -229,7 +229,8 @@ def AddUserToGroup(UserId,GroupId):## Adds user to group membership , creates re
         #commit changes
         #user now in group
         return True
-    except:
+    except Exception as e:
+        print(e)
         DatabaseRollback()
         return render_template("index.html")
 
