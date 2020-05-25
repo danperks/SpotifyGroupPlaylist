@@ -1,5 +1,6 @@
 import requests
 import urllib
+import json
 from config import ClientID , ClientSecret
 
 ##Thoughts about database - instead of tracking the votes, we can jsut add a "local file " to each database which just has SongName - Vote Count - idk , maybe althouhg would need to think about what is done to stop multiple voting and it is a bodge
@@ -114,6 +115,26 @@ def GetUsersLikedSongs(UserAccessToken):#Pagination - Deprecated
 
 def GetUsersPlaylists(UserAccessToken):
     return "s"
+
+def FollowGroupPlaylist(Playlist,UserAccessToken):
+    return "s"
+
+def CreateGroupPlaylist(UserId,Name,UserAccessToken,description):
+    print("called")
+    headers = {
+        'Authorization': 'Bearer ' + str(UserAccessToken),
+        'Content-Type': 'application/json'
+    }
+    bodyParameters={
+        "name":str(Name),
+        "public":"false",
+        "description":str(description)
+    }
+    
+    r = requests.post("https://api.spotify.com/v1/users/"+UserId+"/playlists",headers=headers,data = json.dumps(bodyParameters)).json()
+    #print(json.dumps(bodyParameters))
+    
+    return r["id"]
 
 def GetItemsInPlaylist(PlaylistId,UserAccessToken):
     SongIds = []

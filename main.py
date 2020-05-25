@@ -210,8 +210,8 @@ def CreateNewGroup(UserId):
     GroupId =''.join(secrets.choice(string.ascii_letters + string.digits) for _ in range(10)) ## Ideally would like to do databse generates random id 
     UserID = str(UserId)
     Name = UserID+"'s Group" ## Array of the user id's - obvs just contianig just one here    
-    params = {'GroupId':tuple([GroupId]),'Users':tuple([UserID]),"Name":tuple([Name])}
-    SQLcursor.execute("INSERT INTO public.\"Groups\"(\"GroupId\",\"LeadUser\",\"GroupName\") VALUES (%(GroupId)s,%(Users)s,%(Name)s);",params)
+    params = {'GroupId':tuple([GroupId]),'Users':tuple([UserID]),"Name":tuple([Name]),"Output":tuple([CreateGroupPlaylist(UserId,str(Name),request.cookies["AuthToken"],str(UserId))])}
+    SQLcursor.execute("INSERT INTO public.\"Groups\"(\"GroupId\",\"Output\",\"LeadUser\",\"GroupName\") VALUES (%(GroupId)s,%(Output)s,%(Users)s,%(Name)s);",params)
     conn.commit()
     AddUserToGroup(UserID,GroupId)
     return (True,GroupId)
@@ -355,6 +355,8 @@ def HaveAllVotesBeenReceived(GroupId,AuthToken):##plan is sketchy but it will do
 def PlaylistOutput(GroupId,AuthToken):
     Songs = GetSongs("",GroupId,AuthToken)
     Users = GetUsersInGroup(GroupId)
+    ##if HaveAllVotesBeenReceived(GroupId,AuthToken):
+
     ##not neccessarily all in this method but the plan
     ## Get lead user ID(first in Array)
     ## get refresh token from users table
