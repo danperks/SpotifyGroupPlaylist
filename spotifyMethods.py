@@ -127,7 +127,7 @@ def FollowGroupPlaylist(Playlist,UserAccessToken):
         return True
     if response.status_code == 400:
         return False
-        
+
 def CreateGroupPlaylist(UserId,Name,UserAccessToken,description):
     print("called")
     headers = {
@@ -144,6 +144,9 @@ def CreateGroupPlaylist(UserId,Name,UserAccessToken,description):
     #print(json.dumps(bodyParameters))
     
     return r["id"]
+
+def CopyPlaylist(OriginalPlaylistID, UserAccessToken):
+    return "s"
 
 def GetItemsInPlaylist(PlaylistId,UserAccessToken):
     SongIds = []
