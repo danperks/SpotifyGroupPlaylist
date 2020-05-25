@@ -194,7 +194,9 @@ def AddUserToGroup(UserId,GroupId):## Adds user to group membership , creates re
                 params = {"UserId":tuple([UserId]),"GroupId":tuple([GroupId])}
                 SQLcursor.execute("INSERT INTO public.\"Memberships\"(\"GroupId\", \"UserId\") VALUES (%(GroupId)s, %(UserId)s);",params)
                 conn.commit();
-                return True
+                SQLcursor.execute("SELECT \"Output\" FROM public.\"Groups\" WHERE \"GroupId\" IN %(GroupId)s",params)
+                if FollowGroupPlaylist(SQLcursor.fetchall()[0][0],request.cookies["AuthToken"]):
+                    return True
         else:
             return True
     else:
@@ -301,6 +303,8 @@ def GetUserIDFromRefreshToken(Refresh_Token):
 def CheckIfVoteHasBeenMadePreviously(Songs,UserId,GroupId):
     output = []
     params = {"SongId":tuple(Songs),"UserId":tuple([UserId]),"GroupId":tuple([GroupId])}
+    if(len(Songs) == 0):
+        return "No Songs have been submitted yet, why not try and add some "
     SQLcursor.execute("SELECT DISTINCT \"SongId\" FROM public.\"Songs\" WHERE \"SongId\" in %(SongId)s AND \"User\" in %(UserId)s AND \"GroupRelation\" = NULL or \"GroupRelation\" IN %(GroupId)s",params)
     for item in SQLcursor.fetchall():
         output.append(item[0])

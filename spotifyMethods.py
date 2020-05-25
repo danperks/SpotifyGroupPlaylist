@@ -116,9 +116,18 @@ def GetUsersLikedSongs(UserAccessToken):#Pagination - Deprecated
 def GetUsersPlaylists(UserAccessToken):
     return "s"
 
-def FollowGroupPlaylist(Playlist,UserAccessToken):
-    return "s"
-
+def FollowGroupPlaylist(Playlist,UserAccessToken):    
+    headers = {
+    'Authorization': 'Bearer '+str(UserAccessToken),
+    'Content-Type': 'application/json',
+    }
+    data = '{"public": false}'
+    response = requests.put('https://api.spotify.com/v1/playlists/'+str(Playlist)+'/followers', headers=headers, data=data)
+    if response.status_code == 200:       
+        return True
+    if response.status_code == 400:
+        return False
+        
 def CreateGroupPlaylist(UserId,Name,UserAccessToken,description):
     print("called")
     headers = {
