@@ -95,7 +95,8 @@ function SetAlbumImage(SongID){
 function PackUpSendBack(){
     alert("End Of List Reached");
     HideElements();
-    // add the check to see if all votes have been received 
+    // add the check to see if all votes have been received
+     
 }
 function CheckBoxStateCheck(){
     StateOfCheckbox = document.getElementById("VotesPermanent").checked;
