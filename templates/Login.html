@@ -33,7 +33,13 @@
     </div>
 </body>
 <script>
-    
+    function Logout(){
+        
+        document.cookie = "UserId=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+        document.cookie = "RefreshToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+        document.cookie = "AuthToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+        window.location.replace("/");
+    }
     
     function LeaveGroup(){
         GroupToLeave = document.getElementById("EnteredGroup").value;
