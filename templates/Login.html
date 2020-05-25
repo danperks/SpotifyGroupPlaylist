@@ -34,15 +34,10 @@
 </body>
 <script>
     
-    function Logout(){
-        $.cookie('AuthToken',0,-1);
-        $.cookie('UserId',0,-1);
-        $.cookie('RefreshToken',0,-1);
-
-    }
+    
     function LeaveGroup(){
         GroupToLeave = document.getElementById("EnteredGroup").value;
-        $.get("/Management/AbandonGroup",{GroupCode:GroupToLeave}).done(RefreshGroups());
+        $.get("/Management/AbandonGroup",{GroupCode:GroupToLeave}).done(function(){RefreshGroups()});
             
      }
     function SubmitAPlaylist(){
@@ -52,16 +47,18 @@
         sessionStorage.setItem("CurrentGroup",document.getElementById("EnteredGroup").value);//set current group
     }
     function RefreshGroups(){
-        $.get("/api/UserGroups").done(function(data){
+        $('#GroupTable').empty();
+        $.ajax("/api/UserGroups").done(function(data){
             var table = document.getElementById("GroupTable")
             for(i =0;i<data[0].length;i++){
                 var row = table.insertRow();
-                var cell1 = row.insertCell(0).innerHTML=data[0][i];
-                var cell2 = row.insertCell(1).innerHTML=data[1][i];
+                var cell1 = row.insertCell(0).innerHTML=data[1][i];
+                var cell2 = row.insertCell(1).innerHTML=data[0][i];
                 
             }
         })
-
+    
+    return "Table Updated"
     }
     $(document).ready(RefreshGroups())
 
