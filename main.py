@@ -276,7 +276,7 @@ def RemoveUserFromGroup(UserId,GroupId):#reverse of add pretty much - not convin
     try:
         if DoesGroupExist(GroupId):
             if IsUserLeadUser(UserId,GroupId):
-                if SetNewLeadUser(UserId,GroupId) == False:
+                if SetNewLeadUser(UserId,GroupId) == False:##If the user is the last person in the group then they remain listed against the group but without membership, an error but not one big enough for now
                     return "False"
             params = {"UserId":tuple([UserId]),"GroupId":tuple([GroupId])}
             SQLcursor.execute("DELETE FROM public.\"Memberships\" WHERE (\"GroupId\", \"UserId\") = (%(GroupId)s, %(UserId)s);",params)
@@ -300,9 +300,10 @@ def SetNewLeadUser(UserIdToDelete,GroupId):
             params["NewUserLead"] = tuple([NewUserId])## not so sure about this 
             SQLcursor.execute("UPDATE public.\"Groups\" SET \"LeadUser\" = %(NewUserLead)s WHERE \"GroupId\" IN %(GroupId)s",params)
             conn.commit()
+            return True
     except:
         DatabaseRollback()
-        return render_template("index.html")
+        return False# might regret not having this redirect back to the front page but for now
 def IsUserLeadUser(UserId,GroupId):
     try:
         params = {"GroupId":tuple([GroupId])}
