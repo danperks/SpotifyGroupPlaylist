@@ -27,7 +27,9 @@ conn = psycopg2.connect(host = DatabaseHost,database = Database,user = DatabaseU
 SQLcursor = conn.cursor()
 ## go environment varible for user and password , will do for now
 #Database
-
+@app.route('/favicon.ico')    
+def icon():
+    return send_file("./static/favicon.ico", mimetype='image/ico')
 @app.route("/CreateGroup",methods=["GET"])
 def CreateGroup():
     UserID = GetUserIDFromRefreshToken(str(request.cookies["RefreshToken"]))
