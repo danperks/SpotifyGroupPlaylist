@@ -165,6 +165,7 @@ def GetItemsInPlaylist(PlaylistId,UserAccessToken):
 
 
 def PushToNewPlaylist(UserAccessToken,ArrayOfSongs,PlaylistId):
+    #do this https://developer.spotify.com/documentation/web-api/reference/playlists/add-tracks-to-playlist/
     ##Takes array
     ##spotify api -> add items to playlist
     ##voila
