@@ -325,6 +325,15 @@ def IsUserLeadUser(UserId,GroupId):
     except:
         DatabaseRollback()
         return render_template("index.html")
+def GetLeadUser(GroupId):
+    try:
+        params = {"GroupId":tuple([GroupId])}
+        SQLcursor.execute("SELECT \"LeadUser\" FROM public.\"Groups\" WHERE \"GroupId\" IN %(GroupId)s",params)
+        return SQLcursor.fetchone()[0]
+    except:
+        DatabaseRollback()
+        return render_template("index.html")
+    
 def GetUsersGroups(UserId):
     try:
         UserGroups = []
@@ -368,6 +377,15 @@ def AddOutputPlaylist(PlaylistUrl,GroupId):
     except:
         DatabaseRollback()
         return render_template("index.html")
+def GetOutputPlaylist(GroupId):
+    try:
+        params = {"GroupID":tuple([GroupId])}
+        SQLcursor.execute("SELECT \"Output\" FROM \"Groups\" WHERE \"GroupId\" in %(GroupId)s",params)
+        return SQLcursor.fetchall()[0][0]
+    except Exception as e:
+        print(e)
+        DatabaseRollback()
+        render_template("/")
 
 def UserPlaylistSubmit(PlaylistId,UserId,GroupId):
     try:
@@ -405,6 +423,18 @@ def GetUserIDFromRefreshToken(Refresh_Token):
         DatabaseRollback()
         return render_template("index.html")
 
+def GetRefreshTokenFromUserId(UserId):
+    try:
+        SQLcursor2 = conn.cursor();
+        params = {"UserId":tuple([UserId])}
+        SQLcursor2.execute("SELECT \"RefreshToken\" FROM public.\"Users\" WHERE \"UserId\" in %(UserId)s",params)
+        for item in SQLcursor2.fetchall():
+            #print("UserID" + item[0])
+            return item[0]
+    except:
+        DatabaseRollback()
+        return render_template("index.html")
+    
 
 def CheckIfVoteHasBeenMadePreviously(Songs,UserId,GroupId):
     try:
@@ -434,6 +464,14 @@ def HasAVoteBeenReceived(SongId,GroupID,Users):
     try:#for each song gets the distinct votes for it, if the amount of votes is the same as users then its true
         params = {"SongId":tuple([SongId]),"UserId":tuple(Users),"GroupId":tuple([GroupID])}
         SQLcursor.execute("SELECT DISTINCT \"User\" FROM public.\"Songs\" WHERE \"SongId\" in %(SongId)s AND \"User\" in %(UserId)s AND \"GroupRelation\" = NULL or \"GroupRelation\" IN %(GroupId)s",params)
+        return [item for item in SQLcursor.fetchall()]#return users who have voted for that song
+    except:
+        DatabaseRollback()
+        return render_template("index.html")
+def ReturnPostiveVoesForSong(SongId,GroupID,Users):
+    try:#for each song gets the distinct votes for it, if the amount of votes is the same as users then its true
+        params = {"SongId":tuple([SongId]),"UserId":tuple(Users),"GroupId":tuple([GroupID])}
+        SQLcursor.execute("SELECT DISTINCT \"User\" FROM public.\"Songs\" WHERE \"SongId\" in %(SongId)s AND \"User\" in %(UserId)s AND \"GroupRelation\" = NULL or \"GroupRelation\" IN %(GroupId)s AND \"VoteInFavour\" = TRUE",params)
         return [item for item in SQLcursor.fetchall()]#return users who have voted for that song
     except:
         DatabaseRollback()
@@ -487,7 +525,45 @@ def HaveAllVotesBeenReceived(GroupId,AuthToken):##plan is sketchy but it will do
 def PlaylistOutput(GroupId,AuthToken):
     Songs = GetSongs("",GroupId,AuthToken)
     Users = GetUsersInGroup(GroupId)
-    ##if HaveAllVotesBeenReceived(GroupId,AuthToken):
+    LeadUserAccessToken = RefreshAccessToken(GetRefreshTokenFromUserId(GetLeadUser(GroupId))) # i think hti smight bring up t he cookie mistmatch error again with the amount of refreshes im doing rn
+    ##if HaveAllVotesBeenReceived(GroupId,AuthToken): ## Might have it work only when all votes have been recieived, but if its called on every vote idk
+    OutputPlaylist = str(GetOutputPlaylist(GroupId))
+    SongsToAdd = []
+    for Song in Songs:
+        UsersWhoVotedPostive = ReturnPostiveVoesForSong(Song,GroupId,Users)
+        if set(UsersWhoVotedPostive) == set(Users):
+            SongsToAdd.append("spotify:track:"+str(Song)) ## Song has been voted on as a banger by all users, this will very rarely be achevied as it can only be triggered if the person who propsed it leaves the group after votes have been cast
+        else:
+            IsSongApproved = True # Assumption of True - famous last words
+            for User in set(Users).difference(UsersWhoVotedPostive):
+                if OneTimeIsSongInLibrary(Song,RefreshAccessToken(GetRefreshTokenFromUserId(User))):
+                    pass #do nothing - its calm                    
+                elif IsSongInPlaylistSubmitted(Song,User,GroupId,RefreshAccessToken(GetRefreshTokenFromUserId(User))):
+                    pass ## do nothing -its calm . assumption will take care of it
+                    
+                else:
+                    IsSongApproved = False
+                
+            if IsSongApproved == True:
+                SongsToAdd.append("spotify:track:"+str(Song))## this is sketchy , would need to see if somehow i can push to the spotofy playlist jsut off song id(i would think i can as they are returned when you go the other way), but for now as the URI are just id+what was detailed, it'll do
+   
+   
+    ## Pushing of selected  songs
+    if PushToNewPlaylist(LeadUserAccessToken,SongsToAdd,OutputPlaylist):
+        return True
+    else:
+        return False
+
+                    
+
+                    
+                
+        
+
+        
+    
+
+
 
     ##not neccessarily all in this method but the plan
     ## Get lead user ID(first in Array)
