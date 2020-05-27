@@ -95,6 +95,7 @@ function SetAlbumImage(SongID){
     })
 }
 function GetThirtySecondAudio(SongID){
+    $.("#PreviewPlayer").show();
     $.ajax({
         url:"https://api.spotify.com/v1/tracks/"+ String(SongID),
         headers:{
@@ -103,6 +104,9 @@ function GetThirtySecondAudio(SongID){
         success:function(response){
             console.log(response)
             CurrentAudioTrack = response["preview_url"]
+            if(CurrentAudioTrack == "null"){
+                $.("#PreviewPlayer").hide();
+            }
             document.getElementById("PreviewPlayer").src = CurrentAudioTrack;
            // alert(Cookies.get("AuthToken"))
         }
