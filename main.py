@@ -38,6 +38,10 @@ def icon():
 def CreateGroup():
     UserID = GetUserIDFromRefreshToken(str(request.cookies["RefreshToken"]))
     return CreateNewGroup(UserID)[1]
+@app.route("/Output")
+
+def RunOutput():
+    PlaylistOutput("J9r9J30pwi",str(request.cookies["AuthToken"]))
 
 @app.route("/SpotifyCallback")
 def SpotifyCallBack(): # Spotify Logins in the user, user redirected to the group entry page
@@ -345,7 +349,7 @@ def IsUserLeadUser(UserId,GroupId):
         #SQLcursor = GetNewSQLCursor()
         params = {"GroupId":tuple([GroupId])}
         SQLcursor.execute("SELECT \"LeadUser\" FROM public.\"Groups\" WHERE \"GroupId\" IN %(GroupId)s",params)
-        if (SQLcursor.fetachall()[0][0]) == UserId:
+        if (SQLcursor.fetchall()[0][0]) == UserId:
             return True
         else:
             return False
@@ -357,7 +361,8 @@ def GetLeadUser(GroupId):
         #SQLcursor = GetNewSQLCursor()
         params = {"GroupId":tuple([GroupId])}
         SQLcursor.execute("SELECT \"LeadUser\" FROM public.\"Groups\" WHERE \"GroupId\" IN %(GroupId)s",params)
-        return SQLcursor.fetachall()[0][0]
+        LeadUser = SQLcursor.fetchall()[0][0]
+        return LeadUser
     except:
         DatabaseRollback()
         return render_template("index.html")
@@ -418,7 +423,7 @@ def GetOutputPlaylist(GroupId):
     except Exception as e:
         print(e)
         DatabaseRollback()
-        render_template("/")
+        render_template("/index.html")
 
 def UserPlaylistSubmit(PlaylistId,UserId,GroupId):
     try:
@@ -467,6 +472,7 @@ def GetRefreshTokenFromUserId(UserId):
         SQLcursor2.execute("SELECT \"RefreshToken\" FROM public.\"Users\" WHERE \"UserId\" in %(UserId)s",params)
         for item in SQLcursor2.fetchall():
             #print("UserID" + item[0])
+            print("Refresh Token Returned")
             return item[0]
     except:
         DatabaseRollback()
@@ -571,6 +577,10 @@ def HaveAllVotesBeenReceived(GroupId,AuthToken):##plan is sketchy but it will do
 def PlaylistOutput(GroupId,AuthToken):
     Songs = GetSongs("",GroupId,AuthToken)
     Users = GetUsersInGroup(GroupId)
+    UserKeys = {}
+    for User in Users:
+        UserKeys[User] = RefreshAccessToken(GetRefreshTokenFromUserId(User))
+
     LeadUserAccessToken = RefreshAccessToken(GetRefreshTokenFromUserId(GetLeadUser(GroupId))) # i think hti smight bring up t he cookie mistmatch error again with the amount of refreshes im doing rn
     ##if HaveAllVotesBeenReceived(GroupId,AuthToken): ## Might have it work only when all votes have been recieived, but if its called on every vote idk
     OutputPlaylist = str(GetOutputPlaylist(GroupId))
@@ -582,15 +592,17 @@ def PlaylistOutput(GroupId,AuthToken):
         else:
             IsSongApproved = True # Assumption of True - famous last words
             for User in set(Users).difference(UsersWhoVotedPostive):
-                if OneTimeIsSongInLibrary(Song,RefreshAccessToken(GetRefreshTokenFromUserId(User))):
+                UserAccessToken = UserKeys[User]                
+                if OneTimeIsSongInLibrary(Song,UserAccessToken):
                     pass #do nothing - its calm                    
-                elif IsSongInPlaylistSubmitted(Song,User,GroupId,RefreshAccessToken(GetRefreshTokenFromUserId(User))):
+                elif IsSongInPlaylistSubmitted(Song,User,GroupId,UserAccessToken):
                     pass ## do nothing -its calm . assumption will take care of it
                     
                 else:
                     IsSongApproved = False
                 
             if IsSongApproved == True:
+                print("Song Approved")
                 SongsToAdd.append("spotify:track:"+str(Song))## this is sketchy , would need to see if somehow i can push to the spotofy playlist jsut off song id(i would think i can as they are returned when you go the other way), but for now as the URI are just id+what was detailed, it'll do
    
    

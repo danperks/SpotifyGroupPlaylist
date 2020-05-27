@@ -36,7 +36,8 @@ def RefreshAccessToken(RefreshToken):
         "client_id":ClientID,
         "client_secret":ClientSecret
     }
-    return requests.post("https://accounts.spotify.com/api/token",bodyParameters).json()["access_token"]
+    r = requests.post("https://accounts.spotify.com/api/token",bodyParameters).json()
+    return r["access_token"]
 
 def GetUserID(UserAccessToken):
     headers = {
@@ -51,10 +52,12 @@ def OneTimeIsSongInLibrary(ListOfSpotifyID,UserAccessToken):## Same func ,but do
         "Authorization":'Bearer '+UserAccessToken
     }
     bodyParameters={
-        "ids":",".join(ListOfSpotifyID)
+        "ids":str(ListOfSpotifyID)
     }
     
     r= requests.get("https://api.spotify.com/v1/me/tracks/contains",headers=headers,params=bodyParameters)
+    print(r.text)
+    print(str(ListOfSpotifyID))
     for item in ListOfSpotifyID:
         if r.json() == True:
             return True
@@ -165,8 +168,9 @@ def GetItemsInPlaylist(PlaylistId,UserAccessToken):
 
 
 def PushToNewPlaylist(UserAccessToken,ArrayOfSongs,PlaylistId):
+    print(ArrayOfSongs)
     #do this https://developer.spotify.com/documentation/web-api/reference/playlists/add-tracks-to-playlist/
     ##Takes array
     ##spotify api -> add items to playlist
     ##voila
-    return "s"
+    return True
