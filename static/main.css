@@ -86,6 +86,7 @@ div.input form .group-input {
     border: 1px solid transparent;
     font-size-adjust: 0.7;
     display: inline-block;
+    
 }
 
 div.user-actions .logout-button {
@@ -117,6 +118,7 @@ div.song-details {
 }
 
 div.song-details span.artist {
+    
 
 }
 
