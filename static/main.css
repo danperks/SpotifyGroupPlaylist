@@ -81,9 +81,11 @@ div.input form {
 div.input form .group-input {
     min-height: 20pt;
     margin: 0 5px;
+    min-width:10%;
     background-color: rgba(255,255,255,1);
     border: 1px solid transparent;
     font-size-adjust: 0.7;
+    display: inline-block;
 }
 
 div.user-actions .logout-button {
@@ -133,4 +135,6 @@ div button.login-button {
     max-width: 60vw;
     min-width: 30vw;
     text-align: center;
+    
 }
+
