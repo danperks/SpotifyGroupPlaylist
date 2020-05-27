@@ -24,9 +24,14 @@ app.static_folder = "static"
 app.template_folder = "templates"
 app.config["SECRET_KEY"] = SECRET_KEY
 conn = psycopg2.connect(host = DatabaseHost,database = Database,user = DatabaseUser,password= DatabasePassword)
-SQLcursor = conn.cursor()
+#SQLcursor = conn.cursor()
 ## go environment varible for user and password , will do for now
 #Database
+def GetNewSQLCursor():
+    conn = psycopg2.connect(host = DatabaseHost,database = Database,user = DatabaseUser,password= DatabasePassword)
+    SQLcursor = conn.cursor();
+    return SQLcursor
+
 @app.route('/favicon.ico')    
 def icon():
     return send_file("./static/favicon.ico", mimetype='image/ico')
@@ -129,7 +134,9 @@ def ReturnSongsToVoteOn():
     #return jsonify("s")
     #print("JSON" + str(list(set(Songs).difference(set(PreclearedSongs)))))
     Songs = list(set(Songs).difference(set(CheckIfVoteHasBeenMadePreviously(Songs,UserId,GroupId))))#Remove already voted against for that group ,or for public
-    return jsonify(list(set(Songs).difference(set(PreclearedSongs)))) # sketchy , but will review later, about to have lunch, probably also should return up to json, but that can wait until after lunch
+    output =  jsonify(list(set(Songs).difference(set(PreclearedSongs)))) # sketchy , but will review later, about to have lunch, probably also should return up to json, but that can wait until after lunch
+    print(list(set(Songs).difference(set(PreclearedSongs))))
+    return output
     ##Queries Submitted Playlists
     ##Gets all songs
     ##if song is in liked songs, then it doesn't need to be voted on 
@@ -171,6 +178,7 @@ def ReturnUserGroups():
 
 def DoesGroupExist(GroupId):
     try:
+        SQLcursor = GetNewSQLCursor()
         params = {'g':tuple([GroupId])}
         SQLcursor.execute("SELECT \"GroupId\" from public.\"Groups\" WHERE \"GroupId\" in %(g)s ",params)
         if SQLcursor.rowcount > 0:
@@ -182,6 +190,7 @@ def DoesGroupExist(GroupId):
         return render_template("index.html")
 def DoesUserExist(UserId):
     try:
+        SQLcursor = GetNewSQLCursor()
         params = {'g':tuple([UserId])}
         SQLcursor.execute("SELECT \"UserId\" from public.\"Users\" WHERE \"UserId\" in %(g)s ",params)
         if SQLcursor.rowcount > 0:
@@ -193,6 +202,7 @@ def DoesUserExist(UserId):
         return render_template("index.html")
 def GetUsersInGroup(GroupID):
     try:
+        SQLcursor = GetNewSQLCursor()
         params = {"GroupId":tuple([GroupID])}
         SQLcursor.execute("SELECT DISTINCT \"UserId\" FROM public.\"Memberships\" WHERE \"GroupId\" in %(GroupId)s",params)
         return [item[0] for item in SQLcursor.fetchall()]
@@ -201,6 +211,7 @@ def GetUsersInGroup(GroupID):
         return render_template("index.html")
 def AddUpdateUserRefreshToken(UserId,RefreshToken): ## Name could do with rectification 
     try:
+        SQLcursor = GetNewSQLCursor()
         params = {"UserId":tuple([UserId]),"RefreshToken":tuple([RefreshToken])}
         SQLcursor.execute("INSERT INTO public.\"Users\"(\"UserId\",\"RefreshToken\") VALUES (%(UserId)s,%(RefreshToken)s) ON CONFLICT (\"UserId\") DO UPDATE SET \"RefreshToken\" = %(RefreshToken)s RETURNING \"RefreshToken\" ",params)
         conn.commit()
@@ -211,6 +222,7 @@ def AddUpdateUserRefreshToken(UserId,RefreshToken): ## Name could do with rectif
 def AddUserToGroup(UserId,GroupId):## Adds user to group membership , creates record of memebership for that id for that user
     ##Changed Database Schema - Something slightly more normalised 
     try:
+        SQLcursor = GetNewSQLCursor()
         if DoesGroupExist(GroupId):
             if GroupId not in GetUsersGroups(UserId):
                 if GroupLocked(GroupId) == False:
@@ -238,6 +250,7 @@ def AddUserToGroup(UserId,GroupId):## Adds user to group membership , creates re
 
 def CreateNewGroup(UserId):
     try:
+        SQLcursor = GetNewSQLCursor()
         GroupId =''.join(secrets.choice(string.ascii_letters + string.digits) for _ in range(10)) ## Ideally would like to do databse generates random id 
         UserID = str(UserId)
         Name = UserID+"'s Group" ## Array of the user id's - obvs just contianig just one here    
@@ -254,6 +267,7 @@ def CreateNewGroup(UserId):
 
 def AddUserToDatabase(refresh_token): ## Deprecated - In Favour of Update Refresh Token - Insert on Conflict
     try:
+        SQLcursor = GetNewSQLCursor()
         UserId = GetUserID((RefreshAccessToken(refresh_token)))
         if DoesUserExist(UserId) == False:        
             params = {'UserID':tuple([UserId]),'Refresh_Token':tuple([refresh_token])}
@@ -269,6 +283,7 @@ def AddUserToDatabase(refresh_token): ## Deprecated - In Favour of Update Refres
 
 def IsUserInGroup(UserID,GroupID):
     try:
+        SQLcursor = GetNewSQLCursor()
         if GroupID in GetUsersGroups(UserID):
             return True
         else:
@@ -279,6 +294,7 @@ def IsUserInGroup(UserID,GroupID):
 
 def RemoveUserFromGroup(UserId,GroupId):#reverse of add pretty much - not convinced on usage but will make anyway
     try:
+        SQLcursor = GetNewSQLCursor()
         if DoesGroupExist(GroupId):
             if IsUserLeadUser(UserId,GroupId):
                 if SetNewLeadUser(UserId,GroupId) == False:##If the user is the last person in the group then they remain listed against the group but without membership, an error but not one big enough for now
@@ -296,6 +312,7 @@ def RemoveUserFromGroup(UserId,GroupId):#reverse of add pretty much - not convin
 
 def SetNewLeadUser(UserIdToDelete,GroupId):
     try:
+        SQLcursor = GetNewSQLCursor()
         params = {"UserId":tuple([UserIdToDelete]),"GroupId":tuple([GroupId])}
         SQLcursor.execute("SELECT \"UserId\" FROM public.\"Memberships\" WHERE \"GroupId\" IN %(GroupId)s AND \"UserId\" NOT IN %(UserId)s",params)
         NewUserId = SQLcursor.fetchone()[0]
@@ -316,6 +333,7 @@ def SetNewLeadUser(UserIdToDelete,GroupId):
         return False# might regret not having this redirect back to the front page but for now
 def IsUserLeadUser(UserId,GroupId):
     try:
+        SQLcursor = GetNewSQLCursor()
         params = {"GroupId":tuple([GroupId])}
         SQLcursor.execute("SELECT \"LeadUser\" FROM public.\"Groups\" WHERE \"GroupId\" IN %(GroupId)s",params)
         if (SQLcursor.fetchone()[0]) == UserId:
@@ -327,6 +345,7 @@ def IsUserLeadUser(UserId,GroupId):
         return render_template("index.html")
 def GetLeadUser(GroupId):
     try:
+        SQLcursor = GetNewSQLCursor()
         params = {"GroupId":tuple([GroupId])}
         SQLcursor.execute("SELECT \"LeadUser\" FROM public.\"Groups\" WHERE \"GroupId\" IN %(GroupId)s",params)
         return SQLcursor.fetchone()[0]
@@ -336,6 +355,7 @@ def GetLeadUser(GroupId):
     
 def GetUsersGroups(UserId):
     try:
+        SQLcursor = GetNewSQLCursor()
         UserGroups = []
         params = {"UserId":tuple([UserId])}
         SQLcursor.execute("SELECT \"GroupId\" FROM \"Memberships\" WHERE \"UserId\" in %(UserId)s",params)
@@ -347,6 +367,7 @@ def GetUsersGroups(UserId):
         return render_template("index.html")
 def GetGroupNames(Groups):
     try:
+        SQLcursor = GetNewSQLCursor()
         if len(Groups)>0:
             Names = []
             params ={"Groups":tuple(Groups)}
@@ -360,7 +381,8 @@ def GetGroupNames(Groups):
         DatabaseRollback()
         return render_template("index.html")
 def GroupLocked(GroupId):#check if group is locked
-    try:            
+    try: 
+        SQLcursor = GetNewSQLCursor()           
         params = {"GroupId":tuple([GroupId])}
         print(SQLcursor.execute("SELECT \"Locked\" FROM \"Groups\" WHERE \"GroupId\" in %(GroupId)s",params))
         return SQLcursor.fetchall()[0][0]
@@ -370,6 +392,7 @@ def GroupLocked(GroupId):#check if group is locked
 
 def AddOutputPlaylist(PlaylistUrl,GroupId):
     try:
+        SQLcursor = GetNewSQLCursor()
         params = {"Playlist":tuple([PlaylistUrl]),"GroupId":tuple([GroupId])}#maybe change that to playlist id - idk , see what happens
         SQLcursor.execute("UPDATE public.\"Groups\" SET \"Output\" = %(Playlist)s WHERE \"GroupId\" in %(GroupId)s ;",params)
         conn.commit();
@@ -379,6 +402,7 @@ def AddOutputPlaylist(PlaylistUrl,GroupId):
         return render_template("index.html")
 def GetOutputPlaylist(GroupId):
     try:
+        SQLcursor = GetNewSQLCursor()
         params = {"GroupID":tuple([GroupId])}
         SQLcursor.execute("SELECT \"Output\" FROM \"Groups\" WHERE \"GroupId\" in %(GroupId)s",params)
         return SQLcursor.fetchall()[0][0]
@@ -389,6 +413,7 @@ def GetOutputPlaylist(GroupId):
 
 def UserPlaylistSubmit(PlaylistId,UserId,GroupId):
     try:
+        SQLcursor = GetNewSQLCursor()
         params = {"Playlist":tuple([PlaylistId]),"GroupId":tuple([GroupId]),"UserId":tuple([UserId])}
         SQLcursor.execute("INSERT INTO public.\"PlaylistSubmission\"(\"UserId\",\"PlaylistId\",\"GroupRelation\") VALUES (%(UserId)s,%(Playlist)s,%(GroupId)s);",params)
         conn.commit()##user submits the playlist of their "bangers"
@@ -402,6 +427,7 @@ def UserPlaylistSubmit(PlaylistId,UserId,GroupId):
         return render_template("index.html")
 def ReturnGroupPropostionPlaylists(UserId,GroupId):
     try:
+        SQLcursor = GetNewSQLCursor()
         Playlists = []
         params = {"GroupId":tuple([GroupId]),"UserId":tuple([UserId])}
         SQLcursor.execute("SELECT \"PlaylistId\" FROM \"PlaylistSubmission\" WHERE \"GroupRelation\" in %(GroupId)s AND \"UserId\" NOT in %(UserId)s",params)
@@ -438,20 +464,26 @@ def GetRefreshTokenFromUserId(UserId):
 
 def CheckIfVoteHasBeenMadePreviously(Songs,UserId,GroupId):
     try:
+        SQLcursor = GetNewSQLCursor()
         output = []
         params = {"SongId":tuple(Songs),"UserId":tuple([UserId]),"GroupId":tuple([GroupId])}
         if(len(Songs) == 0):
             return "No Songs have been submitted yet, why not try and add some "
-        SQLcursor.execute("SELECT DISTINCT \"SongId\" FROM public.\"Songs\" WHERE \"SongId\" in %(SongId)s AND \"User\" in %(UserId)s AND \"GroupRelation\" = NULL or \"GroupRelation\" IN %(GroupId)s",params)
+        SQLcursor.execute("SELECT DISTINCT \"SongId\" FROM public.\"Songs\" WHERE \"SongId\" in %(SongId)s AND \"User\" in %(UserId)s AND \"GroupRelation\" IS NULL or \"GroupRelation\" IN %(GroupId)s",params)
+        #print(SQLcursor.mogrify("SELECT DISTINCT \"SongId\" FROM public.\"Songs\" WHERE \"SongId\" in %(SongId)s AND \"User\" in %(UserId)s AND \"GroupRelation\" = NULL or \"GroupRelation\" IN %(GroupId)s",params))
         for item in SQLcursor.fetchall():
             output.append(item[0])
+       # print(output)
         return output
     except:
+        print("rolling back")
         DatabaseRollback()
         return render_template("index.html")
 
 def AddSongVote(SongId,UserId,LikedBool,GroupID):
     try:
+        SQLcursor = GetNewSQLCursor()
+        print("Vote Recorded for " +str(SongId) +" "+ str(UserId)+" "+str(LikedBool))
         params = {"SongId":tuple([SongId]),"UserId":tuple([UserId]),"Liked":tuple([LikedBool]),"GroupID":tuple([GroupID])}
         SQLcursor.execute("INSERT INTO public.\"Songs\"(\"SongId\",\"User\",\"VoteInFavour\",\"GroupRelation\") VALUES (%(SongId)s,%(UserId)s,%(Liked)s,%(GroupID)s);",params)
         conn.commit();
@@ -462,6 +494,7 @@ def AddSongVote(SongId,UserId,LikedBool,GroupID):
 
 def HasAVoteBeenReceived(SongId,GroupID,Users):
     try:#for each song gets the distinct votes for it, if the amount of votes is the same as users then its true
+        SQLcursor = GetNewSQLCursor()
         params = {"SongId":tuple([SongId]),"UserId":tuple(Users),"GroupId":tuple([GroupID])}
         SQLcursor.execute("SELECT DISTINCT \"User\" FROM public.\"Songs\" WHERE \"SongId\" in %(SongId)s AND \"User\" in %(UserId)s AND \"GroupRelation\" = NULL or \"GroupRelation\" IN %(GroupId)s",params)
         return [item for item in SQLcursor.fetchall()]#return users who have voted for that song
@@ -470,6 +503,7 @@ def HasAVoteBeenReceived(SongId,GroupID,Users):
         return render_template("index.html")
 def ReturnPostiveVoesForSong(SongId,GroupID,Users):
     try:#for each song gets the distinct votes for it, if the amount of votes is the same as users then its true
+        SQLcursor = GetNewSQLCursor()
         params = {"SongId":tuple([SongId]),"UserId":tuple(Users),"GroupId":tuple([GroupID])}
         SQLcursor.execute("SELECT DISTINCT \"User\" FROM public.\"Songs\" WHERE \"SongId\" in %(SongId)s AND \"User\" in %(UserId)s AND \"GroupRelation\" = NULL or \"GroupRelation\" IN %(GroupId)s AND \"VoteInFavour\" = TRUE",params)
         return [item for item in SQLcursor.fetchall()]#return users who have voted for that song
@@ -479,6 +513,7 @@ def ReturnPostiveVoesForSong(SongId,GroupID,Users):
 def IsSongInPlaylistSubmitted(SongId,UserId,GroupId,AuthToken):
     Playlists = []
     try:
+        SQLcursor = GetNewSQLCursor()
         params = {"GroupId":tuple([GroupId]),"UserId":tuple([UserId])}
         SQLcursor.execute("SELECT \"PlaylistId\" FROM \"PlaylistSubmission\" WHERE \"GroupRelation\" in %(GroupId)s AND \"UserId\" in %(UserId)s",params)
         for item in SQLcursor.fetchall():

@@ -12,9 +12,11 @@ var CurrentSong = "";
 var CurrentGroup = sessionStorage.getItem("CurrentGroup");
 var StateOfCheckbox = false;
 var CurrentAudioTrack = "";
-console.log(CurrentGroup)
+console.log(CurrentGroup);
 $(document).ready(function() {
     $.get('/ReturnSongsAwaitVote',{GroupId:CurrentGroup}).done(function(data){
+        SongsToVoteOn=[];
+        CurrentSong = "";
         SongsToVoteOn= data;
         //console.log(data);
         //alert(SongsToVoteOn)
@@ -30,7 +32,7 @@ function MakeButtonsLive(){//probably should mess around with doing this propelr
         $("#AgainstButton").prop("disabled", false);
         $("#InFavourButton").prop("disabled", false);
         //alert(sessionStorage.getItem("CurrentGroup"));
-        CurrentSong = SongsToVoteOn[0];
+        
         //console.log(CurrentSong)
     }
 }
@@ -65,6 +67,7 @@ function VoteAgainst(){
     })
 }
 function NextSong(){
+    console.log(SongsToVoteOn)
     //console.log("Next Song Called");
     if (SongsToVoteOn && SongsToVoteOn.length >0){
         CurrentSong = SongsToVoteOn.pop();
@@ -95,7 +98,7 @@ function SetAlbumImage(SongID){
     })
 }
 function GetThirtySecondAudio(SongID){
-    $.("#PreviewPlayer").show();
+    $("#PreviewPlayer").show();
     $.ajax({
         url:"https://api.spotify.com/v1/tracks/"+ String(SongID),
         headers:{
@@ -104,8 +107,8 @@ function GetThirtySecondAudio(SongID){
         success:function(response){
             console.log(response)
             CurrentAudioTrack = response["preview_url"]
-            if(CurrentAudioTrack == "null"){
-                $.("#PreviewPlayer").hide();
+            if(CurrentAudioTrack == null){
+                $("#PreviewPlayer").hide();
             }
             document.getElementById("PreviewPlayer").src = CurrentAudioTrack;
            // alert(Cookies.get("AuthToken"))
