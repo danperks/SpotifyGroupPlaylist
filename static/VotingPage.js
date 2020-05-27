@@ -11,6 +11,7 @@ var CurrentSong = "";
 
 var CurrentGroup = sessionStorage.getItem("CurrentGroup");
 var StateOfCheckbox = false;
+var CurrentAudioTrack = "";
 console.log(CurrentGroup)
 $(document).ready(function() {
     $.get('/ReturnSongsAwaitVote',{GroupId:CurrentGroup}).done(function(data){
@@ -69,6 +70,7 @@ function NextSong(){
         CurrentSong = SongsToVoteOn.pop();
         document.getElementById("VoteCount").innerHTML = String(SongsToVoteOn.length);
         SetAlbumImage(CurrentSong);
+        GetThirtySecondAudio(CurrentSong);
     }
     else{
         //Now at end of the list
@@ -92,6 +94,22 @@ function SetAlbumImage(SongID){
 
     })
 }
+function GetThirtySecondAudio(SongID){
+    $.ajax({
+        url:"https://api.spotify.com/v1/tracks/"+ String(SongID),
+        headers:{
+            'Authorization': 'Bearer ' + String(Cookies.get("AuthToken")),
+        },
+        success:function(response){
+            console.log(response)
+            CurrentAudioTrack = response["preview_url"]
+            document.getElementById("PreviewPlayer").src = CurrentAudioTrack;
+           // alert(Cookies.get("AuthToken"))
+        }
+
+    })
+}
+
 function PackUpSendBack(){
     alert("End Of List Reached");
     HideElements();
