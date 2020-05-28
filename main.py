@@ -41,7 +41,8 @@ def CreateGroup():
 @app.route("/Output")
 
 def RunOutput():
-    PlaylistOutput("J9r9J30pwi",str(request.cookies["AuthToken"]))
+     return PlaylistOutput("J9r9J30pwi",str(request.cookies["AuthToken"]))
+   
 
 @app.route("/SpotifyCallback")
 def SpotifyCallBack(): # Spotify Logins in the user, user redirected to the group entry page
@@ -486,7 +487,7 @@ def CheckIfVoteHasBeenMadePreviously(Songs,UserId,GroupId):
         params = {"SongId":tuple(Songs),"UserId":tuple([UserId]),"GroupId":tuple([GroupId])}
         if(len(Songs) == 0):
             return "No Songs have been submitted yet, why not try and add some "
-        SQLcursor.execute("SELECT DISTINCT \"SongId\" FROM public.\"Songs\" WHERE \"SongId\" in %(SongId)s AND \"User\" in %(UserId)s AND \"GroupRelation\" IS NULL or \"GroupRelation\" IN %(GroupId)s",params)
+        SQLcursor.execute("SELECT DISTINCT \"SongId\" FROM public.\"Songs\" WHERE \"SongId\" in %(SongId)s AND \"User\" in %(UserId)s AND (\"GroupRelation\" IS NULL or \"GroupRelation\" IN %(GroupId)s)",params)
         #print(SQLcursor.mogrify("SELECT DISTINCT \"SongId\" FROM public.\"Songs\" WHERE \"SongId\" in %(SongId)s AND \"User\" in %(UserId)s AND \"GroupRelation\" = NULL or \"GroupRelation\" IN %(GroupId)s",params))
         for item in SQLcursor.fetchall():
             output.append(item[0])
@@ -513,7 +514,7 @@ def HasAVoteBeenReceived(SongId,GroupID,Users):
     try:#for each song gets the distinct votes for it, if the amount of votes is the same as users then its true
         #SQLcursor = GetNewSQLCursor().cursor()
         params = {"SongId":tuple([SongId]),"UserId":tuple(Users),"GroupId":tuple([GroupID])}
-        SQLcursor.execute("SELECT DISTINCT \"User\" FROM public.\"Songs\" WHERE \"SongId\" in %(SongId)s AND \"User\" in %(UserId)s AND \"GroupRelation\" = NULL or \"GroupRelation\" IN %(GroupId)s",params)
+        SQLcursor.execute("SELECT DISTINCT \"User\" FROM public.\"Songs\" WHERE \"SongId\" in %(SongId)s AND \"User\" in %(UserId)s AND (\"GroupRelation\" IS NULL or \"GroupRelation\" IN %(GroupId)s)",params)
         return [item for item in SQLcursor.fetchall()]#return users who have voted for that song
     except:
         DatabaseRollback()
@@ -522,11 +523,12 @@ def ReturnPostiveVoesForSong(SongId,GroupID,Users):
     try:#for each song gets the distinct votes for it, if the amount of votes is the same as users then its true
         #SQLcursor = GetNewSQLCursor().cursor()
         params = {"SongId":tuple([SongId]),"UserId":tuple(Users),"GroupId":tuple([GroupID])}
-        SQLcursor.execute("SELECT DISTINCT \"User\" FROM public.\"Songs\" WHERE \"SongId\" in %(SongId)s AND \"User\" in %(UserId)s AND \"GroupRelation\" = NULL or \"GroupRelation\" IN %(GroupId)s AND \"VoteInFavour\" = TRUE",params)
+        SQLcursor.execute("SELECT DISTINCT \"User\" FROM public.\"Songs\" WHERE \"SongId\" in %(SongId)s AND \"User\" in %(UserId)s AND (\"GroupRelation\" IS NULL or \"GroupRelation\" IN %(GroupId)s) AND \"VoteInFavour\" = TRUE",params)
         return [item for item in SQLcursor.fetchall()]#return users who have voted for that song
-    except:
+    except Exception as e:
+        print(e)
         DatabaseRollback()
-        return render_template("index.html")
+        return redirect("index.html") ##not so sure about this but itll do
 def IsSongInPlaylistSubmitted(SongId,UserId,GroupId,AuthToken):
     Playlists = []
     try:
@@ -535,9 +537,11 @@ def IsSongInPlaylistSubmitted(SongId,UserId,GroupId,AuthToken):
         SQLcursor.execute("SELECT \"PlaylistId\" FROM \"PlaylistSubmission\" WHERE \"GroupRelation\" in %(GroupId)s AND \"UserId\" in %(UserId)s",params)
         for item in SQLcursor.fetchall():
             Playlists.append(item[0])  
+        print("Playlists Submittd" + str(Playlists) + str(UserId))
         for item in Playlists:##adds all songs to the playlist
             for song in GetItemsInPlaylist(item,AuthToken):
                 if song == SongId:
+                    print ("Song in Playlist Submitted by " + str(UserId))
                     return True
     except:
         DatabaseRollback()
@@ -587,30 +591,37 @@ def PlaylistOutput(GroupId,AuthToken):
     SongsToAdd = []
     for Song in Songs:
         UsersWhoVotedPostive = ReturnPostiveVoesForSong(Song,GroupId,Users)
+        print("Users Who Voted Positive " + str(set(UsersWhoVotedPostive)))
+        #print(str(Users)+" - Total Users")
+        #print(str(UsersWhoVotedPostive) +" - Users Pos Votes")
         if set(UsersWhoVotedPostive) == set(Users):
             SongsToAdd.append("spotify:track:"+str(Song)) ## Song has been voted on as a banger by all users, this will very rarely be achevied as it can only be triggered if the person who propsed it leaves the group after votes have been cast
         else:
             IsSongApproved = True # Assumption of True - famous last words
             for User in set(Users).difference(UsersWhoVotedPostive):
+                print("Current User " + str(User))
                 UserAccessToken = UserKeys[User]                
                 if OneTimeIsSongInLibrary(Song,UserAccessToken):
+                    print(str(Song) + " -  Positive " + str(User))
                     pass #do nothing - its calm                    
                 elif IsSongInPlaylistSubmitted(Song,User,GroupId,UserAccessToken):
+                    print(str(Song) + " -  Positive " + str(User))
                     pass ## do nothing -its calm . assumption will take care of it
                     
                 else:
+                    print(str(Song) +" is not approved")
                     IsSongApproved = False
                 
             if IsSongApproved == True:
-                print("Song Approved")
+                print(str(Song) + " Song Approved")
                 SongsToAdd.append("spotify:track:"+str(Song))## this is sketchy , would need to see if somehow i can push to the spotofy playlist jsut off song id(i would think i can as they are returned when you go the other way), but for now as the URI are just id+what was detailed, it'll do
    
    
     ## Pushing of selected  songs
     if PushToNewPlaylist(LeadUserAccessToken,SongsToAdd,OutputPlaylist):
-        return True
+        return str(SongsToAdd)
     else:
-        return False
+        return str(SongsToAdd)
 
                     
 

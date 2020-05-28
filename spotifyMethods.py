@@ -56,8 +56,6 @@ def OneTimeIsSongInLibrary(ListOfSpotifyID,UserAccessToken):## Same func ,but do
     }
     
     r= requests.get("https://api.spotify.com/v1/me/tracks/contains",headers=headers,params=bodyParameters)
-    print(r.text)
-    print(str(ListOfSpotifyID))
     for item in ListOfSpotifyID:
         if r.json() == True:
             return True
@@ -168,6 +166,7 @@ def GetItemsInPlaylist(PlaylistId,UserAccessToken):
 
 
 def PushToNewPlaylist(UserAccessToken,ArrayOfSongs,PlaylistId):
+    print("Pushing")
     print(ArrayOfSongs)
     #do this https://developer.spotify.com/documentation/web-api/reference/playlists/add-tracks-to-playlist/
     ##Takes array
