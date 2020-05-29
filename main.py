@@ -623,6 +623,23 @@ def PlaylistOutput(GroupId,AuthToken):
     else:
         return str(SongsToAdd)
 
+## New Plan
+
+## At Present,  I am 90% confident that the above works. Will check a bit further.
+## But it is so slow and inefficent
+
+## I propose , Query spotify first , for all the songs in the playlist - store the true and false in a dictionary for each song for that user
+## for song not true for that user, then check if it was them that submitted it
+## lastly check our db to see what their votes were for the songs that are still false
+
+## the above can in theroy work in either order, the reverse will mean easier reqs to send to spotify
+
+## then once all of the above is done,
+##check the dictionaries of all 3 of the users and find the songs in common that are marked as true
+## this will in theory make the system more efficent
+
+## as it stands, whilst confident in obtaining the data to produce an accurate result(i.e the concept is fine), the product is not deliverable being this inefficent 
+
                     
 
                     
@@ -634,25 +651,7 @@ def PlaylistOutput(GroupId,AuthToken):
 
 
 
-    ##not neccessarily all in this method but the plan
-    ## Get lead user ID(first in Array)
-    ## get refresh token from users table
-    ## obtain access token using above
-    ## create new playlist in that users library
-    ## add neccessary songs to that playlist
 
-    ##Check to see all songs have been voted on , done by checking accs then check the db for those not in accs
-    ##once all done
-    ##Those in db with all votes are added to playlist output
-    ##then
-    ## For every song not marked off by each user , the song is queried against that users library to see if liked, if liked that vote is then taken
-    ##when all songs have received a vote then they are put on the output playlsit
-    ##
-
-    ##sketchy : but could assume that a missing vote on the db indicates it's already saved to that user's library as we record new likes and dislikes , meaning that old likes are the only ones missing
-    ##would however mean that not voting counts in favour, but probably best incase someone fails to keep voting , idk
-
-    ##
     return "s"
 
 
