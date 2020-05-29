@@ -574,9 +574,11 @@ def ReturnSongsInSubmittedPlaylist(GroupId,AuthToken):
                 Playlists[item[0]] = {} 
                 Playlists[item[0]][item[1]]={"Songs":{}}
         for User in Playlists:
+            Output = []
             for Playlist in Playlists[User]:
-                Output = GetItemsInPlaylist(Playlist,AuthToken)            
-                Playlists[User][Playlist]["Songs"] = Output
+                Output +=GetItemsInPlaylist(Playlist,AuthToken)  
+            Playlists[User]= Output     
+                
                                     #print(Song)
 
         return Playlists
