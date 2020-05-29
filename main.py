@@ -524,7 +524,7 @@ def ReturnPostiveVoesForSong(SongId,GroupID,Users):
         #SQLcursor = GetNewSQLCursor().cursor()
         params = {"SongId":tuple([SongId]),"UserId":tuple(Users),"GroupId":tuple([GroupID])}
         SQLcursor.execute("SELECT DISTINCT \"User\" FROM public.\"Songs\" WHERE \"SongId\" in %(SongId)s AND \"User\" in %(UserId)s AND (\"GroupRelation\" IS NULL or \"GroupRelation\" IN %(GroupId)s) AND \"VoteInFavour\" = TRUE",params)
-        return [item for item in SQLcursor.fetchall()]#return users who have voted for that song
+        return [item[0] for item in SQLcursor.fetchall()]#return users who have voted for that song
     except Exception as e:
         print(e)
         DatabaseRollback()
