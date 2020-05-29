@@ -678,10 +678,13 @@ def NewPlaylistOutput(GroupId,AuthToken):
         if Vote[2] == True:
             OutputArray[Vote[1]][Vote[0]] = Vote[2]
     PlaylistVotes = ReturnSongsInSubmittedPlaylist(GroupId,AuthToken)
+    for User in PlaylistVotes:
+        for item in PlaylistVotes[User]:
+            OutputArray[User][item] = True
     #print(PlaylistVotes.get("").get("").get("Songs"))
     ## ADD Votes In Playlists
     #print(str(ReturnSongsInSubmittedPlaylist(GroupId,AuthToken)) + "Playlist")
-    return jsonify(ReturnSongsInSubmittedPlaylist(GroupId,AuthToken))
+    return jsonify(OutputArray)
 
 
 
