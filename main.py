@@ -41,7 +41,8 @@ def CreateGroup():
 @app.route("/Output")
 
 def RunOutput():
-     return PlaylistOutput("J9r9J30pwi",str(request.cookies["AuthToken"]))
+    return NewPlaylistOutput("J9r9J30pwi",str(request.cookies["AuthToken"]))
+    #return PlaylistOutput("J9r9J30pwi",str(request.cookies["AuthToken"]))
    
 
 @app.route("/SpotifyCallback")
@@ -529,6 +530,17 @@ def ReturnPostiveVoesForSong(SongId,GroupID,Users):
         print(e)
         DatabaseRollback()
         return redirect("index.html") ##not so sure about this but itll do
+def ReturnPostiveVotesForGroup(SongId,GroupID,Users):
+    try:#for each song gets the distinct votes for it, if the amount of votes is the same as users then its true
+        #SQLcursor = GetNewSQLCursor().cursor()
+        params = {"SongId":tuple(SongId),"UserId":tuple(Users),"GroupId":tuple([GroupID])}
+        SQLcursor.execute("SELECT * FROM public.\"Songs\" WHERE \"SongId\" in %(SongId)s AND \"User\" in %(UserId)s AND (\"GroupRelation\" IS NULL or \"GroupRelation\" IN %(GroupId)s) AND \"VoteInFavour\" = TRUE",params)
+        return SQLcursor.fetchall()#return users who have voted for that song
+    except Exception as e:
+        print("excepted")
+        print(e)
+        DatabaseRollback()
+        return redirect("index.html") ##not so sure about this but itll do
 def IsSongInPlaylistSubmitted(SongId,UserId,GroupId,AuthToken):
     Playlists = []
     try:
@@ -548,6 +560,30 @@ def IsSongInPlaylistSubmitted(SongId,UserId,GroupId,AuthToken):
 
     
     return False
+
+def ReturnSongsInSubmittedPlaylist(GroupId,AuthToken):
+    Playlists = {}
+    OutputArray = {} # 
+    try:
+        params = {"GroupId":tuple([GroupId]),}
+        SQLcursor.execute("SELECT * FROM \"PlaylistSubmission\" WHERE \"GroupRelation\" in %(GroupId)s ",params)
+        for item in SQLcursor.fetchall():            
+            if item[0] in Playlists.keys():
+                Playlists[item[0]][item[1]]={"Songs":{}}
+            else:    
+                Playlists[item[0]] = {} 
+                Playlists[item[0]][item[1]]={"Songs":{}}
+        for User in Playlists:
+            for Playlist in Playlists[User]:
+                Output = GetItemsInPlaylist(Playlist,AuthToken)            
+                Playlists[User][Playlist]["Songs"] = Output
+                                    #print(Song)
+
+        return Playlists
+
+    except Exception as e:
+        print(e)
+        DatabaseRollback()
 
 ### Meta as in the other meta##
 def DatabaseRollback():
@@ -622,6 +658,30 @@ def PlaylistOutput(GroupId,AuthToken):
         return str(SongsToAdd)
     else:
         return str(SongsToAdd)
+
+
+def NewPlaylistOutput(GroupId,AuthToken):
+    ## SetUp
+    Songs = GetSongs("",GroupId,AuthToken)
+    OutputArray = {}   
+    UserArray = [] 
+    for item in GetUsersInGroup(GroupId):
+        OutputArray[item] = {}
+        UserArray.append(item)
+    for Song in Songs:
+        for User in OutputArray:
+            OutputArray[User][Song] = False
+    ## ADD Votes In Db
+    for Vote in ReturnPostiveVotesForGroup(Songs,GroupId,UserArray):
+        if Vote[2] == True:
+            OutputArray[Vote[1]][Vote[0]] = Vote[2]
+    PlaylistVotes = ReturnSongsInSubmittedPlaylist(GroupId,AuthToken)
+    #print(PlaylistVotes.get("").get("").get("Songs"))
+    ## ADD Votes In Playlists
+    #print(str(ReturnSongsInSubmittedPlaylist(GroupId,AuthToken)) + "Playlist")
+    return jsonify(ReturnSongsInSubmittedPlaylist(GroupId,AuthToken))
+
+
 
 ## New Plan
 
