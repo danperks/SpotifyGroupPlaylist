@@ -640,6 +640,7 @@ def PlaylistOutput(GroupId,AuthToken):
 
 ## as it stands, whilst confident in obtaining the data to produce an accurate result(i.e the concept is fine), the product is not deliverable being this inefficent 
 
+## wait, this is all one thread atm .hmm, the current implementation is far too sequential to take threads but the new one could do it 1am brain thinks.
                     
 
                     
