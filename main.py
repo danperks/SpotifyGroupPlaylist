@@ -419,7 +419,7 @@ def AddOutputPlaylist(PlaylistUrl,GroupId):
 def GetOutputPlaylist(GroupId):
     try:
         #SQLcursor = GetNewSQLCursor().cursor()
-        params = {"GroupID":tuple([GroupId])}
+        params = {"GroupId":tuple([GroupId])}
         SQLcursor.execute("SELECT \"Output\" FROM \"Groups\" WHERE \"GroupId\" in %(GroupId)s",params)
         return SQLcursor.fetchall()[0][0]
     except Exception as e:
@@ -616,7 +616,7 @@ def HaveAllVotesBeenReceived(GroupId,AuthToken):##plan is sketchy but it will do
     ##once the count for all the songs is the same as the amount of users in the group , all votes have been recived
     return "s"
 
-def PlaylistOutput(GroupId,AuthToken):
+def PlaylistOutput(GroupId,AuthToken): ##Deprecated
     Songs = GetSongs("",GroupId,AuthToken)
     Users = GetUsersInGroup(GroupId)
     UserKeys = {}
@@ -668,6 +668,8 @@ def NewPlaylistOutput(GroupId,AuthToken):
     OutputArray = {}   
     UserArray = [] 
     DeletedItems = {}
+    LeadUserAccessToken = RefreshAccessToken(GetRefreshTokenFromUserId(GetLeadUser(GroupId)))
+    OutputPlaylist = str(GetOutputPlaylist(GroupId))
     for item in GetUsersInGroup(GroupId):
         OutputArray[item] = {}
         UserArray.append(item)
@@ -694,7 +696,9 @@ def NewPlaylistOutput(GroupId,AuthToken):
 
     for User in OutputArray:
         OutputArray[User] ={ key : value for key,value in OutputArray[User].items() if key not in DeletedItems}
-    print(DeletedItems)
+    #print(DeletedItems)
+    ArrayToSend = list(OutputArray[UserArray[0]].keys())
+    PushToNewPlaylist(LeadUserAccessToken,ArrayToSend,OutputPlaylist,0,49)
     return jsonify(OutputArray)
 
 

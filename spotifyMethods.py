@@ -165,11 +165,32 @@ def GetItemsInPlaylist(PlaylistId,UserAccessToken):
     return SongIds
 
 
-def PushToNewPlaylist(UserAccessToken,ArrayOfSongs,PlaylistId):
-    print("Pushing")
+def PushToNewPlaylist(UserAccessToken,ArrayOfSongs,PlaylistId,start,end):
+    
     print(ArrayOfSongs)
+    if start == len(ArrayOfSongs):
+        return []
+    AlreadyPresent = []
+    ArrayOfSongs = ["spotify:track:" + s for s in ArrayOfSongs[start:end]]
+    headers = {
+        "Accept": "application/json",
+        "Authorization":'Bearer '+UserAccessToken
+    }
+    params = {"uris":ArrayOfSongs[start:end]}
+    
+    print(params)
+    r= requests.post("https://api.spotify.com/v1/playlists/"+str(PlaylistId)+"/tracks",headers=headers,json=params)
+    print(r)            
+    if len(ArrayOfSongs)<=end+49:
+        PushToNewPlaylist(UserAccessToken,ArrayOfSongs,PlaylistId,end,len(ArrayOfSongs))
+        #print(AlreadyPresent)
+    if len(ArrayOfSongs)>end+49:
+        #print("lower")
+        PushToNewPlaylist(UserAccessToken,ArrayOfSongs,PlaylistId,end,(end+49))
+       # print(AlreadyPresent)
+    
+    return AlreadyPresent
     #do this https://developer.spotify.com/documentation/web-api/reference/playlists/add-tracks-to-playlist/
     ##Takes array
     ##spotify api -> add items to playlist
     ##voila
-    return True
