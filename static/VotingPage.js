@@ -31,7 +31,9 @@ function MakeButtonsLive(){//probably should mess around with doing this propelr
     if (SongsToVoteOn.length >0){
         document.getElementById("AgainstButton").hidden = false;
         document.getElementById("InFavourButton").hidden = false;
-       // $("#AgainstButton").removeAttr("disabled");//,false);
+        $("#AgainstButton").removeAttr("disabled");
+        $("#InFavourButton").removeAttr("disabled");
+         //,false);
         //$("#InFavourButton").prop("disabled",false);
         //alert(sessionStorage.getItem("CurrentGroup"));
         
@@ -64,6 +66,7 @@ function VoteAgainst(){
         var GroupValueToSendBack = CurrentGroup;
     }
     console.log("Current Votes Applicable To " + GroupValueToSendBack.toString())
+    document.getElementById("PreviewPlayer").pause();
     $.get('/VotesReturned',{VotesAgainst:JSON.stringify([CurrentSong]),GroupId:GroupValueToSendBack}).done(function(data){
         NextSong();
     })
