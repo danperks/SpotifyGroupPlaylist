@@ -667,6 +667,7 @@ def NewPlaylistOutput(GroupId,AuthToken):
     Songs = GetSongs("",GroupId,AuthToken)
     OutputArray = {}   
     UserArray = [] 
+    DeletedItems = {}
     for item in GetUsersInGroup(GroupId):
         OutputArray[item] = {}
         UserArray.append(item)
@@ -687,16 +688,13 @@ def NewPlaylistOutput(GroupId,AuthToken):
             if val == False:
                 UserSongsToSend.append(key)
         for PositiveSong in IsSongInUserLibrary(UserSongsToSend,AuthToken,0,49): ## Want to Test this further
-            OutputArray[User][PositiveSong] = True       
-        OutputArray[User] ={ key : value for key,value in OutputArray[User].items() if value == True} ## Only those which are true remain
+            OutputArray[User][PositiveSong] = True
+        DeletedItems={**DeletedItems,**{key:value for key,value in OutputArray[User].items() if value == False}}
+        OutputArray[User] ={ key : value for key,value in OutputArray[User].items() if value == True } ## Only those which are true remain
 
-        
-
-
-
-        
-        
-    
+    for User in OutputArray:
+        OutputArray[User] ={ key : value for key,value in OutputArray[User].items() if key not in DeletedItems}
+    print(DeletedItems)
     return jsonify(OutputArray)
 
 
