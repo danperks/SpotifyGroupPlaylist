@@ -681,9 +681,22 @@ def NewPlaylistOutput(GroupId,AuthToken):
     for User in PlaylistVotes:
         for item in PlaylistVotes[User]:
             OutputArray[User][item] = True
-    #print(PlaylistVotes.get("").get("").get("Songs"))
-    ## ADD Votes In Playlists
-    #print(str(ReturnSongsInSubmittedPlaylist(GroupId,AuthToken)) + "Playlist")
+    for User in OutputArray:
+        UserSongsToSend =[]
+        for key,val in OutputArray[User].items():
+            if val == False:
+                UserSongsToSend.append(key)
+        for PositiveSong in IsSongInUserLibrary(UserSongsToSend,AuthToken,0,49): ## Want to Test this further
+            OutputArray[User][PositiveSong] = True       
+        OutputArray[User] ={ key : value for key,value in OutputArray[User].items() if value == True} ## Only those which are true remain
+
+        
+
+
+
+        
+        
+    
     return jsonify(OutputArray)
 
 
