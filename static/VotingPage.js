@@ -29,8 +29,10 @@ $(document).ready(function() {
 
 function MakeButtonsLive(){//probably should mess around with doing this propelry off a chain of promises / async funcitons etc, but acc that seems to work so , even if sketchy
     if (SongsToVoteOn.length >0){
-        $("#AgainstButton").prop("disabled", false);
-        $("#InFavourButton").prop("disabled", false);
+        document.getElementById("AgainstButton").hidden = false;
+        document.getElementById("InFavourButton").hidden = false;
+       // $("#AgainstButton").removeAttr("disabled");//,false);
+        //$("#InFavourButton").prop("disabled",false);
         //alert(sessionStorage.getItem("CurrentGroup"));
         
         //console.log(CurrentSong)
@@ -100,7 +102,7 @@ function SetAlbumImage(SongID){
 function GetThirtySecondAudio(SongID){
     $("#PreviewPlayer").show();
     $.ajax({
-        url:"https://api.spotify.com/v1/tracks/"+ String(SongID),
+        url:"https://api.spotify.com/v1/tracks/"+ String(SongID)+"?market=from_token",
         headers:{
             'Authorization': 'Bearer ' + String(Cookies.get("AuthToken")),
         },
@@ -110,22 +112,28 @@ function GetThirtySecondAudio(SongID){
             if(CurrentAudioTrack == null){
                 $("#PreviewPlayer").hide();
             }
-            document.getElementById("PreviewPlayer").src = CurrentAudioTrack;
+            else{
+                document.getElementById("PreviewPlayer").src = CurrentAudioTrack;
+            }
+        }
+
+        })
+           
            // alert(Cookies.get("AuthToken"))
         }
 
-    })
-}
+    
+
 
 function PackUpSendBack(){
-    alert("End Of List Reached");
+    //alert("End Of List Reached");
     HideElements();
     // add the check to see if all votes have been received
      
 }
 function CheckBoxStateCheck(){
     StateOfCheckbox = document.getElementById("VotesPermanent").checked;
-    alert(StateOfCheckbox);
+    //alert(StateOfCheckbox);
     console.log(StateOfCheckbox);
 }
 function HideElements(){
