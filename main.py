@@ -180,8 +180,7 @@ def GetSongs(UserId,GroupId,AuthToken):
 def ReturnUserGroups():
     UserID = GetUserIDFromRefreshToken(str(request.cookies["RefreshToken"]))
     Groups = GetUsersGroups(UserID)
-    Names = GetGroupNames(Groups)
-    return jsonify(Groups,Names)
+    return jsonify(GetGroupNames(Groups))
     
 ###### DATABASE METHODS ####
 
@@ -386,11 +385,13 @@ def GetGroupNames(Groups):
         #SQLcursor = GetNewSQLCursor().cursor()
         if len(Groups)>0:
             Names = []
+            GroupCodes = []
             params ={"Groups":tuple(Groups)}
-            SQLcursor.execute("SELECT \"GroupName\" FROM \"Groups\" WHERE \"GroupId\" in %(Groups)s",params)
+            SQLcursor.execute("SELECT * FROM \"Groups\" WHERE \"GroupId\" in %(Groups)s",params)
             for item in SQLcursor.fetchall():
-                Names.append(item[0])
-            return Names
+                Names.append(item[4])
+                GroupCodes.append(item[0])
+            return (GroupCodes,Names)
         else:
             return ["You Are Not In Any Groups At This Point"]
     except:
