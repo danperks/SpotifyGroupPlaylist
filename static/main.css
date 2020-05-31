@@ -15,7 +15,9 @@ body div.container {
     border-radius: 20px;
     justify-content: space-around;
 }
-
+li:hover{
+    background-color: #22b14c;
+}
 .central-x {
     position: relative;
     left: 50%;
