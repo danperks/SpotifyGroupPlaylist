@@ -72,7 +72,8 @@ function VoteAgainst(){
     })
 }
 function NextSong(){
-    console.log(SongsToVoteOn)
+    //console.log(SongsToVoteOn)
+    $("#PreviewPlayer").hide();
     //console.log("Next Song Called");
     if (SongsToVoteOn && SongsToVoteOn.length >0){
         CurrentSong = SongsToVoteOn.pop();
@@ -103,7 +104,6 @@ function SetAlbumImage(SongID){
     })
 }
 function GetThirtySecondAudio(SongID){
-    $("#PreviewPlayer").show();
     $.ajax({
         url:"https://api.spotify.com/v1/tracks/"+ String(SongID)+"?market=from_token",
         headers:{
@@ -116,6 +116,7 @@ function GetThirtySecondAudio(SongID){
                 $("#PreviewPlayer").hide();
             }
             else{
+                $("#PreviewPlayer").show();
                 document.getElementById("PreviewPlayer").src = CurrentAudioTrack;
             }
         }
@@ -143,6 +144,8 @@ function HideElements(){
     $('#divHide').children().hide();
     
 }
+
+
     // Both Arrays combined into JSON String wdetailing what each array is
     //field for group added
     //field for user id added
