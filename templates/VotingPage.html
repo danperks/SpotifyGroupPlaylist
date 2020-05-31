@@ -2,12 +2,13 @@
 <html>
 <head>
     <title>Spotify Group Bangers</title>
-    <meta name="viewport" content="width=device-width, initial-scale=0.5"> 
+    <meta name="viewport" content="width=device-width, initial-scale=0.8"> 
     <link rel="stylesheet" type="text/css" href="../static/main.css">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script> 
         
 </head>
 <body class="central-y-child">
+    
     <div class="song container" id="divHide">
         <img id="AlbumCover" style="height:25em;width: 25em;"></img>
         <div class="song-preview">
@@ -32,13 +33,22 @@
             <a id ="PreviewUrl"></a>
         </span>
     </div>
-    
+    <button id = "SubmitAPlaylist" onclick="PlaylistBoxLoad()">Submit A Playlist</button>
+    <div id="SubmissionOverlay">  
+        <div class="modal-content">
+            <input id="UserPlaylistTyping" type="text" name="PlaylistEntry" placeholder="Enter Your Playlist">
+            <ul id = "TableOfPlaylists">
+                
+            </ul>
+        </div>
+    </div>
    
   
     
 </body>
 <script src="https://cdn.jsdelivr.net/npm/js-cookie@rc/dist/js.cookie.min.js"></script>
-<script src="/static/VotingPage.js"></script>  
+<script src="/static/VotingPage.js"></script>
+<script src="/static/PlaylistSubmission.js"></script>    
         
     
 
