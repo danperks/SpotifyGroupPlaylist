@@ -97,6 +97,18 @@ def AbandonGroup():
 def SpotifyLogIn():
         return redirect(ApplicationVerification())
 
+@app.route("/ReturnUserPlaylists",methods = ["GET"])
+def ReturnUserPlaylists():
+    return GetUsersPlaylists(request.cookies["AuthToken"]) ## not an important enough ,  can rely on a cookie 
+@app.route("/RecordNewPlaylist",methods = ["POST"])
+def PlaylistRecord():
+    PlaylistId = escape(request.args["PlaylistId"])
+    GroupId = escape(request.args["GroupId"])
+    UserId = escape(request.cookies["UserId"])
+    AuthToken = escape(request.cookies["AuthToken"])
+    if DoesGroupExist(GroupId):
+        if DoesPlaylistExist(PlaylistId,AuthToken):
+            UserPlaylistSubmit(PlaylistId,UserId,GroupId)
 @app.route("/VotesReturned",methods = ["GET"])
 def VotesReturned():## function originally designed to process all votes at once, but doign one individually will work , not a big enough priority to refine further
     UserID = GetUserIDFromRefreshToken(request.cookies["RefreshToken"])

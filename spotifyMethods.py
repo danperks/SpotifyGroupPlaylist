@@ -115,7 +115,12 @@ def GetUsersLikedSongs(UserAccessToken):#Pagination - Deprecated
     
 
 def GetUsersPlaylists(UserAccessToken):
-    return "s"
+    headers = {
+    'Authorization': 'Bearer '+str(UserAccessToken),
+    
+    }
+    r = requests.get("https://api.spotify.com/v1/me/playlists",headers = headers)
+    return r.json()
 
 def FollowGroupPlaylist(Playlist,UserAccessToken):    
     headers = {
@@ -163,6 +168,20 @@ def GetItemsInPlaylist(PlaylistId,UserAccessToken):
         SongIds.append(item["track"]["id"])
     
     return SongIds
+
+def DoesPlaylistExist(PlaylistId,AccessToken): ## check the string actually exists before going anywhere near the db
+    SongIds = []
+    headers = {
+        "Accept": "application/json",
+        "Content-Type": "application/json",
+        "Authorization":'Bearer '+str(UserAccessToken)
+        
+    }
+    r = requests.get("https://api.spotify.com/v1/playlists/"+PlaylistId+"/tracks",headers=headers).json()
+    if r["items"]:
+        return True
+    else:
+        return False
 
 
 def PushToNewPlaylist(UserAccessToken,ArrayOfSongs,PlaylistId,start,end):
