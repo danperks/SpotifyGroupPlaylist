@@ -174,7 +174,7 @@ def DoesPlaylistExist(PlaylistId,AccessToken): ## check the string actually exis
     headers = {
         "Accept": "application/json",
         "Content-Type": "application/json",
-        "Authorization":'Bearer '+str(UserAccessToken)
+        "Authorization":'Bearer '+str(AccessToken)
         
     }
     r = requests.get("https://api.spotify.com/v1/playlists/"+PlaylistId+"/tracks",headers=headers).json()

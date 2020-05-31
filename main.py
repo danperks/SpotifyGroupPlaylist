@@ -102,13 +102,21 @@ def ReturnUserPlaylists():
     return GetUsersPlaylists(request.cookies["AuthToken"]) ## not an important enough ,  can rely on a cookie 
 @app.route("/RecordNewPlaylist",methods = ["POST"])
 def PlaylistRecord():
-    PlaylistId = escape(request.args["PlaylistId"])
-    GroupId = escape(request.args["GroupId"])
+    PlaylistId = escape(request.form["PlaylistId"])
+    GroupId = escape(request.form["GroupId"])
     UserId = escape(request.cookies["UserId"])
     AuthToken = escape(request.cookies["AuthToken"])
     if DoesGroupExist(GroupId):
+        print("Group Exists")
         if DoesPlaylistExist(PlaylistId,AuthToken):
+            print("Playlist Exists")
             UserPlaylistSubmit(PlaylistId,UserId,GroupId)
+            return "True"
+        else:
+            return "False"
+    else:
+        print("Does not exits")
+        return "False"
 @app.route("/VotesReturned",methods = ["GET"])
 def VotesReturned():## function originally designed to process all votes at once, but doign one individually will work , not a big enough priority to refine further
     UserID = GetUserIDFromRefreshToken(request.cookies["RefreshToken"])
@@ -451,7 +459,8 @@ def UserPlaylistSubmit(PlaylistId,UserId,GroupId):
         ##maybe a check on how many that user has submitted - idk , does it go against what were doing?
         #when user submits their own playlist each song they put in it is added to the "banger" song table as a vote on their behalf
         return "s"
-    except:
+    except Exception as e:
+        print(e)
         DatabaseRollback()
         return render_template("index.html")
 def ReturnGroupPropostionPlaylists(UserId,GroupId):

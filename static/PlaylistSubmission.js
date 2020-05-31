@@ -42,12 +42,15 @@ function Playlist(item){
             'Authorization': 'Bearer ' + String(Cookies.get("AuthToken")),
         },
         success:function(response){
-            if(response["description"]){
+            console.log(response);
+            if(response["snapshot_id"]){
                 var CurrentGroup = sessionStorage.getItem("CurrentGroup");//this is questionable
                 $.post("/RecordNewPlaylist",{PlaylistId:PlaylistSelected,GroupId:CurrentGroup}).done(function(){
                     console.log("Playlist Sent")
                 });
             }
+}
+    })
 }
 
 
