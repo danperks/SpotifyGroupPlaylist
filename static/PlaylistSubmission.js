@@ -4,7 +4,11 @@ function PlaylistBoxLoad(){
     document.getElementById("SubmissionOverlay").style.display = "block";
     LoadUserPlaylists();
 }
-
+window.onclick = function(event){
+    if(event.target == document.getElementById("SubmissionOverlay")){
+        document.getElementById("SubmissionOverlay").style.display="none";
+    }
+}
 function LoadUserPlaylists(){
     $.ajax({
         url:"https://api.spotify.com/v1/me/playlists",
