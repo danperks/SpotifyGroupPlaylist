@@ -10,9 +10,6 @@ function LeaveGroup(){
     GroupToLeave = document.getElementById("EnteredGroup").value;
     $.get("/Management/AbandonGroup",{GroupCode:GroupToLeave}).done(function(){RefreshGroups()});
         
- }
-function SubmitAPlaylist(){
-    console.log("Submit A Playlist Called")
 }
 function Submission(){
     sessionStorage.setItem("CurrentGroup",document.getElementById("EnteredGroup").value);//set current group
