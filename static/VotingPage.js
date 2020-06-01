@@ -132,6 +132,8 @@ function GetThirtySecondAudio(SongID){
 function PackUpSendBack(){
     //alert("End Of List Reached");
     HideElements();
+    RefreshOutputPlaylist();
+    alert("End of Songs - Check back later to see if any more songs have been submitted");
     // add the check to see if all votes have been received
      
 }
@@ -143,6 +145,12 @@ function CheckBoxStateCheck(){
 function HideElements(){
     $('#divHide').children().hide();
     
+}
+
+function RefreshOutputPlaylist(){
+    $.get("/RefreshOutputPlaylist",{GroupId:CurrentGroup}).done(function(){
+        console.log("Output Playlist Refreshed");
+    })
 }
 
 

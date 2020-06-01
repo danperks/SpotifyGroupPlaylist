@@ -39,10 +39,7 @@ def CreateGroup():
     NewGroupName = request.form["GroupName"]
     UserID = GetUserIDFromRefreshToken(str(request.cookies["RefreshToken"]))
     return CreateNewGroup(UserID,NewGroupName)[1]
-@app.route("/Output")
 
-def RunOutput():
-    return NewPlaylistOutput("J9r9J30pwi",str(request.cookies["AuthToken"]))
     #return PlaylistOutput("J9r9J30pwi",str(request.cookies["AuthToken"]))
    
 
@@ -97,6 +94,13 @@ def AbandonGroup():
 @app.route("/SpotifyAuthorise") #Create a check to see if user is already registed, if they are then we need to call a refresh token rather than a new one
 def SpotifyLogIn():
         return redirect(ApplicationVerification())
+
+@app.route("/RefreshOutputPlaylist",methods= ["GET"])
+def RefreshPlaylist():
+    GroupId = str(request.args["GroupId"])
+    AuthToken = str(request.cookies["AuthToken"])
+    return NewPlaylistOutput(GroupId,AuthToken)
+
 
 @app.route("/ReturnUserPlaylists",methods = ["GET"])
 def ReturnUserPlaylists():
