@@ -36,7 +36,11 @@ return "Table Updated"
 $(document).ready(RefreshGroups())
 
 function CreateAGroup(){
-$.get("/CreateGroup").done(function(data){
-    alert("Your New Group is " + String(data))
-})
+    DeafultUserName = String(Cookies.get("UserId")) + "'s Group"
+    GroupNameEntry = window.prompt("Enter A Group Name",DeafultUserName);
+    
+
+    $.post("/CreateGroup",{GroupName:GroupNameEntry}).done(function(data){
+        alert("Your New Group is " + String(data))
+    })
 }

@@ -34,10 +34,11 @@ def GetNewSQLCursor():
 @app.route('/favicon.ico')    
 def icon():
     return send_file("./static/favicon.ico", mimetype='image/ico')
-@app.route("/CreateGroup",methods=["GET"])
+@app.route("/CreateGroup",methods=["POST"])
 def CreateGroup():
+    NewGroupName = request.form["GroupName"]
     UserID = GetUserIDFromRefreshToken(str(request.cookies["RefreshToken"]))
-    return CreateNewGroup(UserID)[1]
+    return CreateNewGroup(UserID,NewGroupName)[1]
 @app.route("/Output")
 
 def RunOutput():
@@ -282,12 +283,12 @@ def AddUserToGroup(UserId,GroupId):## Adds user to group membership , creates re
         DatabaseRollback()
         return render_template("index.html")
 
-def CreateNewGroup(UserId):
+def CreateNewGroup(UserId,NewGroupName):
     try:
         #SQLcursor = GetNewSQLCursor()
         GroupId =''.join(secrets.choice(string.ascii_letters + string.digits) for _ in range(10)) ## Ideally would like to do databse generates random id 
         UserID = str(UserId)
-        Name = UserID+"'s Group" ## Array of the user id's - obvs just contianig just one here    
+        Name = NewGroupName ## Array of the user id's - obvs just contianig just one here    
         params = {'GroupId':tuple([GroupId]),'Users':tuple([UserID]),"Name":tuple([Name]),"Output":tuple([CreateGroupPlaylist(UserId,str(Name),request.cookies["AuthToken"],str(UserId))])}
         SQLcursor.execute("INSERT INTO public.\"Groups\"(\"GroupId\",\"Output\",\"LeadUser\",\"GroupName\") VALUES (%(GroupId)s,%(Output)s,%(Users)s,%(Name)s);",params)
         conn.commit()
