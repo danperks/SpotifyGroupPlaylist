@@ -154,7 +154,7 @@ def CreateGroupPlaylist(UserId,Name,UserAccessToken,description):
 def CopyPlaylist(OriginalPlaylistID, UserAccessToken):
     return "s"
 
-def GetItemsInPlaylist(PlaylistId,UserAccessToken):
+def GetItemsInPlaylist(PlaylistId,UserAccessToken,ReturnAsSet=False):
     SongIds = []
     headers = {
         "Accept": "application/json",
@@ -163,10 +163,13 @@ def GetItemsInPlaylist(PlaylistId,UserAccessToken):
         
     }
     r = requests.get("https://api.spotify.com/v1/playlists/"+PlaylistId+"/tracks",headers=headers).json()
-    
-    for item in r["items"]:
-        SongIds.append(item["track"]["id"])
-    
+    if ReturnAsSet == False:        
+        for item in r["items"]:
+            SongIds.append(item["track"]["id"])
+    else:
+        SongIds = set()
+        for item in  r["items"]:
+            SongIds.add(item["track"]["id"])
     return SongIds
 
 def DoesPlaylistExist(PlaylistId,AccessToken): ## check the string actually exists before going anywhere near the db
@@ -185,7 +188,12 @@ def DoesPlaylistExist(PlaylistId,AccessToken): ## check the string actually exis
 
 
 def PushToNewPlaylist(UserAccessToken,ArrayOfSongs,PlaylistId,start,end):
-    
+    IsSongInPlaylist = GetItemsInPlaylist(PlaylistId,UserAccessToken,True)
+    for item in ArrayOfSongs:
+        if item in IsSongInPlaylist:
+            ArrayOfSongs.remove(item) ## aready in the array , dont need to re-add
+        else:
+            pass
     print(ArrayOfSongs)
     if start == len(ArrayOfSongs):
         return []
