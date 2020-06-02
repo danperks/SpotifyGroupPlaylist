@@ -6,7 +6,7 @@ from config import ClientID , ClientSecret
 ##Thoughts about database - instead of tracking the votes, we can jsut add a "local file " to each database which just has SongName - Vote Count - idk , maybe althouhg would need to think about what is done to stop multiple voting and it is a bodge
 def ApplicationVerification():#https://developer.spotify.com/documentation/general/guides/authorization-guide/
     auth_parameters ={
-        "client_id":"***REMOVED***",
+        "client_id":ClientID,
         "response_type" : "code",
         "redirect_uri" : "http://127.0.0.1:5000/SpotifyCallback",
         "scope":"user-library-read user-library-modify user-read-private playlist-modify-public playlist-read-private playlist-modify-private"#ok proof of redirect method to the bbc. cant go wrong.
