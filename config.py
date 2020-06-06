@@ -1,3 +1,4 @@
+import os
 DatabaseURL = os.environ['DATABASE_URL']
 ClientID = os.environ['SPOTIFY_CLIENT']
 ClientSecret = os.environ['SPOTIFY_SECRET']
