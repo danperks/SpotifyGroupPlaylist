@@ -159,6 +159,10 @@ def GetItemsInPlaylist(PlaylistId,UserAccessToken,ReturnAsSet=False):
     length = 0 ## off playlist
     offset = 0
     ##print("161 called")
+    if ReturnAsSet == False:
+        SongIds = []
+    else:
+        SongIds = set()
     while True:
         headers = {
             "Accept": "application/json",
@@ -175,7 +179,6 @@ def GetItemsInPlaylist(PlaylistId,UserAccessToken,ReturnAsSet=False):
             if offset >length:## can see a logic error coming a mile off here , shouldnt do this at 1215 am
                 break
         else:
-            SongIds = set()
             for item in  r["items"]:
                 SongIds.add(item["track"]["id"])
             offset = offset+99
@@ -202,7 +205,7 @@ def DoesPlaylistExist(PlaylistId,AccessToken): ## check the string actually exis
 def PushToNewPlaylistController(UserAccessToken,ArrayOfSongs,PlaylistId,start,end):
     IsSongInPlaylist = GetItemsInPlaylist(PlaylistId,UserAccessToken,True)
     #print(IsSongInPlaylist)
-    #print("Before Length = " +  str(len(ArrayOfSongs)))
+    print("Current Amount in Playlist = " +  str(len(IsSongInPlaylist)))
     ArrayOfSongs = [i for i in ArrayOfSongs if i not in IsSongInPlaylist]
     #print("After " +str(len(ArrayOfSongs)))
     return  PushToNewPlaylist(UserAccessToken,ArrayOfSongs,PlaylistId,start,end)
