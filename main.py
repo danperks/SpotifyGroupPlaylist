@@ -23,12 +23,13 @@ app = Flask(__name__)
 app.static_folder = "static"
 app.template_folder = "templates"
 app.config["SECRET_KEY"] = SECRET_KEY
-conn = psycopg2.connect(host = DatabaseHost,database = Database,user = DatabaseUser,password= DatabasePassword)
+#conn = psycopg2.connect(host = DatabaseHost,database = Database,user = DatabaseUser,password= DatabasePassword)
+conn = psycopg2.connect(DatabaseURL)
 SQLcursor = conn.cursor()
 ## go environment varible for user and password , will do for now
 #Database
 def GetNewSQLCursor():
-    conn = psycopg2.connect(host = DatabaseHost,database = Database,user = DatabaseUser,password= DatabasePassword)
+    conn = psycopg2.connect(DatabaseURL)
     return conn
 
 @app.route('/favicon.ico')    

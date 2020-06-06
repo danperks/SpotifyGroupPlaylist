@@ -2,4 +2,3 @@
 *.code-workspace
 __pycache__/
 DatabaseTesting.py
-config.py
