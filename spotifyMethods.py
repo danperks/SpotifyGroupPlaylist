@@ -156,20 +156,32 @@ def CopyPlaylist(OriginalPlaylistID, UserAccessToken):
 
 def GetItemsInPlaylist(PlaylistId,UserAccessToken,ReturnAsSet=False):
     SongIds = []
-    headers = {
-        "Accept": "application/json",
-        "Content-Type": "application/json",
-        "Authorization":'Bearer '+str(UserAccessToken)
-        
-    }
-    r = requests.get("https://api.spotify.com/v1/playlists/"+PlaylistId+"/tracks",headers=headers).json()
-    if ReturnAsSet == False:        
-        for item in r["items"]:
-            SongIds.append(item["track"]["id"])
-    else:
-        SongIds = set()
-        for item in  r["items"]:
-            SongIds.add(item["track"]["id"])
+    length = 0 ## off playlist
+    offset = 0
+    ##print("161 called")
+    while True:
+        headers = {
+            "Accept": "application/json",
+            "Content-Type": "application/json",
+            "Authorization":'Bearer '+str(UserAccessToken)
+            
+        }
+        r = requests.get("https://api.spotify.com/v1/playlists/"+PlaylistId+"/tracks?offset="+str(offset),headers=headers).json()
+        length = int(r["total"])
+        if ReturnAsSet == False:        
+            for item in r["items"]:
+                SongIds.append(item["track"]["id"])
+            offset = offset+99
+            if offset >length:## can see a logic error coming a mile off here , shouldnt do this at 1215 am
+                break
+        else:
+            SongIds = set()
+            for item in  r["items"]:
+                SongIds.add(item["track"]["id"])
+            offset = offset+99
+            if offset >length:
+                break
+    #print("183 lenght" +str(len(SongIds)))
     return SongIds
 
 def DoesPlaylistExist(PlaylistId,AccessToken): ## check the string actually exists before going anywhere near the db
@@ -187,34 +199,29 @@ def DoesPlaylistExist(PlaylistId,AccessToken): ## check the string actually exis
         return False
 
 
-def PushToNewPlaylist(UserAccessToken,ArrayOfSongs,PlaylistId,start,end):
+def PushToNewPlaylistController(UserAccessToken,ArrayOfSongs,PlaylistId,start,end):
     IsSongInPlaylist = GetItemsInPlaylist(PlaylistId,UserAccessToken,True)
-    for item in ArrayOfSongs:
-        if item in IsSongInPlaylist:
-            ArrayOfSongs.remove(item) ## aready in the array , dont need to re-add
-        else:
-            pass
-    print(ArrayOfSongs)
+    #print(IsSongInPlaylist)
+    #print("Before Length = " +  str(len(ArrayOfSongs)))
+    ArrayOfSongs = [i for i in ArrayOfSongs if i not in IsSongInPlaylist]
+    #print("After " +str(len(ArrayOfSongs)))
+    return  PushToNewPlaylist(UserAccessToken,ArrayOfSongs,PlaylistId,start,end)
+
+def PushToNewPlaylist(UserAccessToken,ArrayOfSongs,PlaylistId,start,end):
     if start == len(ArrayOfSongs):
         return []
     AlreadyPresent = []
-    ArrayOfSongs = ["spotify:track:" + s for s in ArrayOfSongs[start:end]]
+    ArrayToSendOff = ["spotify:track:" + s for s in ArrayOfSongs[start:end]]## wonders why array is seemingly overwritten, doesnt see it, finds array being over written * owo shocked pikachu*
     headers = {
         "Accept": "application/json",
         "Authorization":'Bearer '+UserAccessToken
     }
-    params = {"uris":ArrayOfSongs[start:end]}
-    
-    print(params)
+    params = {"uris":ArrayToSendOff} ## might check later if this is inclusive or not , in which case somethign will have to be done
     r= requests.post("https://api.spotify.com/v1/playlists/"+str(PlaylistId)+"/tracks",headers=headers,json=params)
-    print(r)            
-    if len(ArrayOfSongs)<=end+49:
+    if len(ArrayOfSongs)<=end+99:
         PushToNewPlaylist(UserAccessToken,ArrayOfSongs,PlaylistId,end,len(ArrayOfSongs))
-        #print(AlreadyPresent)
-    if len(ArrayOfSongs)>end+49:
-        #print("lower")
-        PushToNewPlaylist(UserAccessToken,ArrayOfSongs,PlaylistId,end,(end+49))
-       # print(AlreadyPresent)
+    if len(ArrayOfSongs)>end+99:
+        PushToNewPlaylist(UserAccessToken,ArrayOfSongs,PlaylistId,end,(end+99))
     
     return AlreadyPresent
     #do this https://developer.spotify.com/documentation/web-api/reference/playlists/add-tracks-to-playlist/

@@ -725,7 +725,7 @@ def NewPlaylistOutput(GroupId,AuthToken):
         OutputArray[User] ={ key : value for key,value in OutputArray[User].items() if key not in DeletedItems}
     #print(DeletedItems)
     ArrayToSend = list(OutputArray[UserArray[0]].keys())
-    PushToNewPlaylist(LeadUserAccessToken,ArrayToSend,OutputPlaylist,0,49)
+    PushToNewPlaylistController(LeadUserAccessToken,ArrayToSend,OutputPlaylist,0,99)
     return jsonify(OutputArray)
 
 
