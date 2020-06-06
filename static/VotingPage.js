@@ -39,6 +39,7 @@ function MakeButtonsLive(){//probably should mess around with doing this propelr
         
         //console.log(CurrentSong)
     }
+    RefreshOutputPlaylist()// refreshes output on user log in
 }
 
 function VoteInFavour(){
