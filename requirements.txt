@@ -6,3 +6,4 @@ flask-jwt==0.3.2
 psycopg2-binary==2.8.4
 jsonify==0.5
 flask_table==0.5.0
+waitress==1.4.4
