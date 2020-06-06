@@ -19,7 +19,7 @@ def GetAuthoristaionToken(AppVerificationToken):
     bodyParameters = {
         "grant_type":"authorization_code",
         "code":AppVerificationToken,
-        "redirect_uri" : "http://127.0.0.1:5000/SpotifyCallback",  
+        "redirect_uri" : RedirectURL,  
         "client_id":ClientID,
         "client_secret":ClientSecret      
     }
