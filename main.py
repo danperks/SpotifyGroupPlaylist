@@ -61,6 +61,8 @@ def SpotifyCallBack(): # Spotify Logins in the user, user redirected to the grou
     
 @app.errorhandler(KeyError)
 def IncorrectKeyError(e):
+    indexStart()
+    print("Inccorrect key error")
     return jsonify(error=str(e)),440
     
 @app.route("/")#index - start page, user asked to either authorise with spotify - or automatic forward to group entry
@@ -83,8 +85,11 @@ def LoadIntoGroup():
     if DoesGroupExist(GroupID) == True:
         print("pass")
         if AddUserToGroup(UserID,GroupID):
-            return render_template("VotingPage.html")
+            return redirect(("/VotingPage"))
     return "Failure Loading Into Group"
+@app.route("/VotingPage")
+def DisplayVotingPage():
+    return render_template("VotingPage.html")
 @app.route("/Management/AbandonGroup",methods = ["GET"])
 def AbandonGroup():
     UserID = GetUserIDFromRefreshToken(str(request.cookies["RefreshToken"]))
