@@ -2,7 +2,7 @@
 <html>
 <head>
     <title>Spotify Group Bangers</title>
-    <meta name="viewport" content="width=device-width, initial-scale=0.8"> 
+    <meta name="viewport" content="width=device-width, height=device-height initial-scale=1"> 
     <link rel="stylesheet" type="text/css" href="../static/main.css">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script> 
         
@@ -10,6 +10,8 @@
 <body class="central-y-child">
     
     <div class="song container" id="divHide">
+        <button id = "SubmitAPlaylist" onclick="PlaylistBoxLoad()">Submit A Playlist</button>
+    <button id = "RefreshOutput" onclick="RefreshOutputPlaylist()">Refresh Output Playlist </button>
         <img id="AlbumCover" style="height:25em;width: 25em;"></img>
         <div class="song-preview">
             <audio id="PreviewPlayer" controls></audio>
@@ -17,8 +19,8 @@
 
         </div>
         <div class="song-details">
-            <span id = "Artist" class="artist"></span>
-            <span id = "Title" class="title"></span>
+            <p><span id = "Artist" class="artist"></span></p>
+            <p><span id = "Title" class="title"></span></p>
         </div>
         <div class="song-vote">
             <button id = "InFavourButton" onclick = "VoteInFavour()" hidden = "true" disabled="disabled">Banger</button>
@@ -33,12 +35,12 @@
             <a id ="PreviewUrl"></a>
         </span>
     </div>
-    <button id = "SubmitAPlaylist" onclick="PlaylistBoxLoad()">Submit A Playlist</button>
-    <button id = "RefreshOutput" onclick="RefreshOutputPlaylist()">Refresh Output Playlist </button>
+    
     <div id="SubmissionOverlay">  
         <div class="modal-content">
             <input id="UserPlaylistTyping" type="text" name="PlaylistEntry" placeholder="Enter Your Playlist">
-            <button onclick = "Playlist(UserPlaylistTyping.value)"> Submit</button>
+            <button onclick = "Playlist(UserPlaylistTyping.value)" class="playlist-submit"> Submit</button>
+            <button onclick = "CloseBox()" class="cancel"> Cancel</button>
             <ul id = "TableOfPlaylists" style = "list-style-type:none;">
 
             </ul>

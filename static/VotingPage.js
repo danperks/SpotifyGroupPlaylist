@@ -24,6 +24,9 @@ $(document).ready(function() {
                 //console.log(SongsToVoteOn);
         MakeButtonsLive();
         CheckBoxStateCheck();
+    }).fail(function(data){
+        alert("Your Session Has Likely Expired  - Redirecting to group selection page");
+        window.location.replace("/");
     });
 });
 
@@ -100,8 +103,10 @@ function SetAlbumImage(SongID){
             document.getElementById("Artist").innerHTML = response["artists"][0]["name"];// will only get first artist but you know where to go with that
             document.getElementById("Title").innerHTML = response["name"]
            // alert(Cookies.get("AuthToken"))
+        },
+        fail:function(response){
+            console.log("Failure : "+String(response));
         }
-
     })
 }
 function GetThirtySecondAudio(SongID){
@@ -120,6 +125,9 @@ function GetThirtySecondAudio(SongID){
                 $("#PreviewPlayer").show();
                 document.getElementById("PreviewPlayer").src = CurrentAudioTrack;
             }
+        },
+        fail:function(response){
+            console.log("Failure : "+String(response));
         }
 
         })

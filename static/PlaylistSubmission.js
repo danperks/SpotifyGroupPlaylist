@@ -4,6 +4,10 @@ function PlaylistBoxLoad(){
     document.getElementById("SubmissionOverlay").style.display = "block";
     LoadUserPlaylists();
 }
+function CloseBox(){
+    document.getElementById("SubmissionOverlay").style.display = "none";
+
+}
 window.onclick = function(event){
     if(event.target == document.getElementById("SubmissionOverlay")){
         document.getElementById("SubmissionOverlay").style.display="none";
