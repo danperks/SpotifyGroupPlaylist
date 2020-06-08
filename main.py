@@ -43,7 +43,7 @@ def CreateGroup():
 
     #return PlaylistOutput("J9r9J30pwi",str(request.cookies["AuthToken"]))
    
-
+     
 @app.route("/SpotifyCallback")
 def SpotifyCallBack(): # Spotify Logins in the user, user redirected to the group entry page
     userReturnedCode = request.args["code"]
@@ -52,10 +52,11 @@ def SpotifyCallBack(): # Spotify Logins in the user, user redirected to the grou
         return render_template("index.html")
     AuthToken = GetAuthoristaionToken(userReturnedCode)
     RefreshToken = AuthToken["refresh_token"]#tokens expire after one hour
-    resp = make_response(render_template("Login.html"))
-    resp.set_cookie("RefreshToken",RefreshToken)
-    resp.set_cookie("UserId",GetUserID(AuthToken["access_token"]))
-    resp.set_cookie("AuthToken",AuthToken["access_token"])
+
+    resp = make_response(redirect("/"))
+    resp.set_cookie("RefreshToken",RefreshToken,samesite="lax")
+    resp.set_cookie("UserId",GetUserID(AuthToken["access_token"]),samesite="lax")
+    resp.set_cookie("AuthToken",AuthToken["access_token"],samesite="lax")
     AddUpdateUserRefreshToken(GetUserID(AuthToken["access_token"]),RefreshToken)##Used to add a new user to the database
     return resp
     
@@ -67,16 +68,21 @@ def IncorrectKeyError(e):
     
 @app.route("/")#index - start page, user asked to either authorise with spotify - or automatic forward to group entry
 def indexStart():
-    if "RefreshToken" in request.cookies:
-        print(request.cookies)
-        print("Cookie Present")#just check for the token
-        PreviousAuthorisation = IsThisStillValid(request.cookies["RefreshToken"])        
-        resp = make_response(render_template("Login.html"))
-        resp.set_cookie("AuthToken",RefreshAccessToken(PreviousAuthorisation))
-        return resp
-    else:
-        print("No Cookie Present")
-        return render_template("index.html")   
+    try:
+        if "RefreshToken" in request.cookies:
+            print(request.cookies)
+            print("Cookie Present")#just check for the token
+            PreviousAuthorisation = IsThisStillValid(request.cookies["RefreshToken"])
+            if PreviousAuthorisation == False:
+                return redirect("/SpotifyAuthorise")      
+            resp = make_response(render_template("Login.html"))
+            resp.set_cookie("AuthToken",RefreshAccessToken(PreviousAuthorisation),samesite="lax")
+            return resp
+        else:
+            print("No Cookie Present")
+            return render_template("index.html")
+    except:
+           return render_template("index.html")
 
 @app.route("/form/EnterCode",methods=["POST"])
 def LoadIntoGroup():
@@ -191,8 +197,10 @@ def page_not_found_error(e):
 
 def IsThisStillValid(RefreshTokenToCheck):
     try:
-        GetUserIDFromRefreshToken(RefreshTokenToCheck)
-        return RefreshTokenToCheck
+        if GetUserIDFromRefreshToken(RefreshTokenToCheck):
+            return RefreshTokenToCheck
+        else:
+            return False ## think thats a bit sketchy but hoping wont cause problmes
     except KeyError:
         return render_template("index.html")
     
@@ -489,6 +497,7 @@ def ReturnGroupPropostionPlaylists(UserId,GroupId):
         return render_template("index.html")
 def GetUserIDFromRefreshToken(Refresh_Token):
     try:
+        print("called 492")
         SQLcursor2 = conn.cursor();
         params = {"RefreshToken":tuple([Refresh_Token])}
         SQLcursor2.execute("SELECT \"UserId\" FROM public.\"Users\" WHERE \"RefreshToken\" in %(RefreshToken)s",params)
