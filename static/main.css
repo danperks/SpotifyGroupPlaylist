@@ -1,3 +1,6 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@100;700&display=swap');
+
+
 body {
     background: linear-gradient(0deg, rgba(255,166,23,1) 0%, rgba(4,64,65,1) 100%);
     width: 100vw;
@@ -127,11 +130,19 @@ div.song.container {
     flex-direction: column;
     width: auto;
     padding: 2em 1em;
+    
+}
+div.ArtContainer{
+    align-items: center;
+}
+div.song-preview{
+    align-items: center;
 }
 
 div.song-details {
     margin-top: 1em;
     align-items: center;
+    align-self: center;
 }
 
 div.song-details span.artist {
@@ -140,6 +151,8 @@ div.song-details span.artist {
 }
 div.song-details span.title {
     color: white;
+    align-self: center;
+    font-size: 1.5rem;
 
 }
 
@@ -152,8 +165,25 @@ div.song-vote {
 div.song-vote button {
     display: block;
     padding: 1em;
+    text-decoration: none;
+    font-size: 1.5rem;
+    font-family: 'Roboto', sans-serif;
+    font-weight: bold;
+    letter-spacing: 1px;
+    color: #fefefe;
+    outline: none;
+}
+div.song-vote button:focus{
+    outline: none;
 }
 
+div.song-vote button.dud{
+    background-color: darkred;    
+}
+
+div.song-vote button.inFavour{
+    background-color:darkgreen ;
+}
 div button.login-button {
     max-width: 60vw;
     min-width: 30vw;
@@ -177,7 +207,7 @@ div button.login-button {
 .modal-content {
     background-color: #fefefe;
     margin: auto;
-    padding: 20px;
+    padding: 2em;
     border: 1px solid #888;
     width: 80%;
   }

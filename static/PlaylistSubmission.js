@@ -13,6 +13,42 @@ window.onclick = function(event){
         document.getElementById("SubmissionOverlay").style.display="none";
     }
 }
+
+
+function LoadUserPlaylistURLController(URL){
+    URL = URL;
+    while(URL != null){    
+        if(URL == null){
+            console.log("URL is NUll");
+            break;
+        }
+        else{
+            URL =  LoadPlaylistFromURL(URL);
+            console.log(URL);
+        }
+    }
+
+}
+ function LoadPlaylistFromURL(URL){
+    $.ajax({
+        url:URL,
+        headers:{
+            'Authorization': 'Bearer ' + String(Cookies.get("AuthToken")),
+        },
+        success:function(response){
+            console.log("success");
+            for(i of response["items"]){
+                PushItemToTable(i);
+            }
+            return response["next"]
+        },
+        fail:function(response){
+            console.log("Failure");
+            return null;
+        }
+    });
+
+}
 function LoadUserPlaylists(){
     $.ajax({
         url:"https://api.spotify.com/v1/me/playlists",
@@ -20,12 +56,14 @@ function LoadUserPlaylists(){
             'Authorization': 'Bearer ' + String(Cookies.get("AuthToken")),
         },
         success:function(response){
+            console.log
             for(i of response["items"]){
-                PlaylistChoices.push(i);
+                PushItemToTable(i);
             }
+            console.log(response["next"]);
+           LoadUserPlaylistURLController(response["next"]);
             for (item of PlaylistChoices){
                 PushItemToTable(item);
-                
             }
             console.log(PlaylistChoices);
         }
