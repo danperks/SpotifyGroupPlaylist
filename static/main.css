@@ -112,6 +112,10 @@ div.user-actions .logout-button {
     max-width: 10em;
     align-self: end;
 }
+button.IssueTracker {
+    max-width: 10em;
+    align-self:front;
+}
 
 div.group.container div.table{
     flex-grow: 3;
