@@ -129,9 +129,12 @@ def FollowGroupPlaylist(Playlist,UserAccessToken):
     }
     data = '{"public": false}'
     response = requests.put('https://api.spotify.com/v1/playlists/'+str(Playlist)+'/followers', headers=headers, data=data)
-    if response.status_code == 200:       
+    print(response.text)
+    if response.status_code == 200:
+        print("response true")       
         return True
     if response.status_code == 400:
+        print(response.text)
         return False
 
 def CreateGroupPlaylist(UserId,Name,UserAccessToken,description):

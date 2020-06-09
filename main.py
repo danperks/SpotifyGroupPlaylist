@@ -282,9 +282,12 @@ def AddUserToGroup(UserId,GroupId):## Adds user to group membership , creates re
                     SQLcursor.execute("INSERT INTO public.\"Memberships\"(\"GroupId\", \"UserId\") VALUES (%(GroupId)s, %(UserId)s);",params)
                     conn.commit()
                     SQLcursor.execute("SELECT \"Output\" FROM public.\"Groups\" WHERE \"GroupId\" IN %(GroupId)s",params)
-                    print(SQLcursor.fetchall())
-                    if FollowGroupPlaylist(SQLcursor.fetchall()[0],request.cookies["AuthToken"]):
+                    output = SQLcursor.fetchall()[0][0]
+                    if FollowGroupPlaylist(output,request.cookies["AuthToken"]):
                         return True
+                    else:
+                        print("Playlist Didnt Go through - spotify:playlist:" +str(output))
+                        
             else:
                 return True
         else:
@@ -312,7 +315,7 @@ def CreateNewGroup(UserId,NewGroupName):
         conn.commit()
         print("Group Created")
         AddUserToGroup(UserID,GroupId)
-        # return (True,GroupId)
+        return (True,GroupId)
     except Exception as e:
         print(e)
         DatabaseRollback()
@@ -719,9 +722,10 @@ def NewPlaylistOutput(GroupId,AuthToken):
         for User in OutputArray:
             OutputArray[User][Song] = False
     ## ADD Votes In Db
-    for Vote in ReturnPostiveVotesForGroup(Songs,GroupId,UserArray):
-        if Vote[2] == True:
-            OutputArray[Vote[1]][Vote[0]] = Vote[2]
+    if len(Songs)>0:
+        for Vote in ReturnPostiveVotesForGroup(Songs,GroupId,UserArray):
+            if Vote[2] == True:
+                OutputArray[Vote[1]][Vote[0]] = Vote[2]
     PlaylistVotes = ReturnSongsInSubmittedPlaylist(GroupId,AuthToken)
     for User in PlaylistVotes:
         for item in PlaylistVotes[User]:
