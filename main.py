@@ -13,11 +13,14 @@ from flask import jsonify
 from flask import escape
 from flask import json, session
 from spotifyMethods import *
-from config import *
 import random
 import string
 import secrets
 
+if 'DATABASE_URL' in os.environ:
+    from config import *
+else:
+    from localconfig import *
 
 app = Flask(__name__)
 app.static_folder = "static"
@@ -35,6 +38,7 @@ def GetNewSQLCursor():
 @app.route('/favicon.ico')    
 def icon():
     return send_file("./static/favicon.ico", mimetype='image/ico')
+
 @app.route("/CreateGroup",methods=["POST"])
 def CreateGroup():
     NewGroupName = request.form["GroupName"]
@@ -103,6 +107,7 @@ def AbandonGroup():
     if GroupCode:
         RemoveUserFromGroup(UserID,GroupCode)
     return "True"
+
 @app.route("/SpotifyAuthorise") #Create a check to see if user is already registed, if they are then we need to call a refresh token rather than a new one
 def SpotifyLogIn():
         return redirect(ApplicationVerification())
@@ -202,7 +207,7 @@ def IsThisStillValid(RefreshTokenToCheck):
         else:
             return False ## think thats a bit sketchy but hoping wont cause problmes
     except KeyError:
-        return render_template("index.html")
+        return render_template("old.html")
     
 def GetSongs(UserId,GroupId,AuthToken):
     Playlists = ReturnGroupPropostionPlaylists(UserId,GroupId)
@@ -237,6 +242,7 @@ def DoesGroupExist(GroupId):
         print(e)
         DatabaseRollback()
         return render_template("index.html")
+    
 def DoesUserExist(UserId):
     try:
         #SQLcursor = GetNewSQLCursor()

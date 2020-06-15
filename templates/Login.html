@@ -1,40 +1,73 @@
-<!doctype html>
-<html>
+<!DOCTYPE html>
+<html lang="en">
+
 <head>
-    <title>Spotify Group Bangers</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" type="text/css" href="/static/main.css">
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/js-cookie@rc/dist/js.cookie.min.js"></script>
+    <title>Dan Perks - Tools</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="icon" type="image/png" href="/static/favicon.ico">
+    <link rel="stylesheet" type="text/css" href="../static/util.css">
+    <link rel="stylesheet" type="text/css" href="../static/main.css">
     <script src="https://sdk.usegripeless.com" async></script>
 </head>
-<body class="central-y-child" style="justify-content:normal">
-    <div class="group container central-y-child central-x" style="padding: 1em 0.5em">
-        <div class="logo">
-            <img class="logo" src="../static/logo.png" alt="logo" style="max-width: 15em;align-self: center;">
-        </div>
-        <div class="input">
-            <form action = "/form/EnterCode" method = "POST">
-                <input class="group-input" type="text" id="EnteredGroup" name="GroupCode" placeholder="Enter Group Code">
-                <br>
-                <button onclick = "Submission()" type="submit" class="group-input" style="overflow:hidden"> Load Into Group</button>
-                <button onclick="CreateAGroup()" type ="button" class="group-input" style="overflow:hidden"> Create A Group</button>
-                <button onclick = "LeaveGroup()" type="button" class = "group-input" style="overflow:hidden">Leave Group</button>
-                
-            </form>
-        </div>
-        <div class="table">
-            <table id = "GroupTable">
-                <th>Group Name</th>
-                <th>Group Id</th>
-            </table>
-        </div>
-        <div class="user-actions">
-            <button onclick="Logout()" class="logout-button">Logout</button>
-            <button onclick="Gripeless.modal('spotifygroupplaylist')" class="IssueTracker">Found an issue?</button>
+
+<body>
+    <a class="dropdown" href="/"> Home </a>
+    <a class="login" onclick="Logout()"> Log Out </a>
+    <div class="limiter">
+        <div class="container-login100">
+            <div class="wrap-login100">
+                <img src="https://www.freepnglogos.com/uploads/spotify-logo-png/spotify-download-logo-30.png" class="middleimage">
+                <span class="login100-form-title">
+					The Banger Generator
+				</span><br>
+                <div class="text-center p-b-26">
+
+                    <div class="container-login100-form-btn">
+                        <div class="wrap-input100">
+                            <input class="input100" type="text" name="code" placeholder="Group Code">
+                            <span class="focus-input100"></span>
+                        </div>
+                    </div>
+
+                    <div class="container-login100-form-btn">
+                        <div class="wrap-input100">
+                            <input class="input100" type="text" name="code" placeholder="Group Code" value="bC1hA3lQ8W" disabled>
+                            <span class="focus-input100"></span>
+                        </div>
+                    </div>
+
+                    <div class="wrap-login100-form-btn">
+                        <div class="login100-form-bgbtn"></div>
+                        <button onclick="Submission()" class="login100-form-btn">
+                            Join Group
+                        </button>
+                    </div>
+
+                    <div class="wrap-login100-form-btn">
+                        <div class="login100-form-bgbtn"></div>
+                        <button onclick="CreateAGroup()" class="login100-form-btn">
+                            Create A Group
+                        </button>
+                    </div>
+
+                    <div class="wrap-login100-form-btn">
+                        <div class="login100-form-bgbtn"></div>
+                        <button onclick="LeaveGroup()" class="login100-form-btn">
+                            Leave Group
+                        </button>
+                    </div>
+
+                    <button onclick="Gripeless.modal('spotifygroupplaylist')">Found an issue?</button>
+
+                </div>
+            </div>
         </div>
     </div>
+
+    <script>
+    </script>
+
 </body>
-<script src="/static/Login.js">   
-</script>
+
 </html>

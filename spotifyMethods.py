@@ -1,7 +1,13 @@
 import requests
 import urllib
 import json
-from config import ClientID , ClientSecret,RedirectURL
+import os
+
+if 'DATABASE_URL' in os.environ:
+    from config import ClientID , ClientSecret,RedirectURL
+else:
+    from localconfig import ClientID , ClientSecret,RedirectURL
+
 
 ##Thoughts about database - instead of tracking the votes, we can jsut add a "local file " to each database which just has SongName - Vote Count - idk , maybe althouhg would need to think about what is done to stop multiple voting and it is a bodge
 def ApplicationVerification():#https://developer.spotify.com/documentation/general/guides/authorization-guide/
