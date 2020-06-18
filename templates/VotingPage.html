@@ -1,43 +1,45 @@
 <!doctype html>
 <html>
+
 <head>
     <title>Spotify Group Bangers</title>
-    <meta name="viewport" content="width=device-width, height=device-height initial-scale=1"> 
+    <meta name="viewport" content="width=device-width, height=device-height initial-scale=1">
     <link rel="stylesheet" type="text/css" href="../static/main.css">
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script> 
-        
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
 </head>
+
 <body class="central-y-child">
-    
+
     <div class="song container" id="divHide">
-        <button id = "SubmitAPlaylist" onclick="PlaylistBoxLoad()">Submit A Playlist</button>
-    <button id = "RefreshOutput" onclick="RefreshOutputPlaylist()">Refresh Output Playlist </button>
+        <button id="SubmitAPlaylist" onclick="PlaylistBoxLoad()">Submit A Playlist</button>
+        <button id="RefreshOutput" onclick="RefreshOutputPlaylist()">Refresh Output Playlist </button>
         <div class="ArtContainer">
             <img id="AlbumCover" style="height:25em;width: 25em;"></img>
         </div>
         <div class="song-preview">
-            <audio id="PreviewPlayer" controls></audio>    
+            <audio id="PreviewPlayer" controls></audio>
 
         </div>
         <div class="song-details">
-            <p><span id = "Title" class="title"></span></p>
-            <p><span id = "Artist" class="artist"></span></p>
-            
+            <p><span id="Title" class="title"></span></p>
+            <p><span id="Artist" class="artist"></span></p>
+
         </div>
         <div class="song-vote">
-            <button id = "AgainstButton" class = "dud" onclick = "VoteAgainst()"  hidden = "true" disabled="disabled">Dud</button>
-            <button id = "InFavourButton" class = "inFavour" onclick = "VoteInFavour()" hidden = "true" disabled="disabled">Banger</button>
-            
-            
-        </div>
-        
-        <div class="PermanetVotes">
-        <span> Keep My Votes Visible For All Groups</span>
-        <input id="VotesPermanent" type="checkbox" onclick="CheckBoxStateCheck()">
+            <button id="AgainstButton" class="dud" onclick="VoteAgainst()" hidden="true" disabled="disabled">Dud</button>
+            <button id="InFavourButton" class="inFavour" onclick="VoteInFavour()" hidden="true" disabled="disabled">Banger</button>
+
+
         </div>
 
-        <div class ="BottomVoteDivider">
-        <span>
+        <div class="PermanetVotes">
+            <span> Keep My Votes Visible For All Groups</span>
+            <input id="VotesPermanent" type="checkbox" onclick="CheckBoxStateCheck()">
+        </div>
+
+        <div class="BottomVoteDivider">
+            <span>
             <a> Amount Of Songs Left</a>
             <a id="VoteCount"></a>
             <a id ="PreviewUrl"></a>
@@ -45,25 +47,25 @@
         </div>
 
     </div>
-    
-    <div id="SubmissionOverlay">  
+
+    <div id="SubmissionOverlay">
         <div class="modal-content">
             <input id="UserPlaylistTyping" type="text" name="PlaylistEntry" placeholder="Enter Your Playlist">
-            <button onclick = "Playlist(UserPlaylistTyping.value)" class="playlist-submit"> Submit</button>
-            <button onclick = "CloseBox()" class="cancel"> Cancel</button>
-            <ul id = "TableOfPlaylists" style = "list-style-type:none; max-height: 20rem; overflow: auto;">
+            <button onclick="Playlist(UserPlaylistTyping.value)" class="playlist-submit"> Submit</button>
+            <button onclick="CloseBox()" class="cancel"> Cancel</button>
+            <ul id="TableOfPlaylists" style="list-style-type:none; max-height: 20rem; overflow: auto;">
 
             </ul>
         </div>
     </div>
-   
-  
+
+
 
 </body>
 <script src="https://cdn.jsdelivr.net/npm/js-cookie@rc/dist/js.cookie.min.js"></script>
 <script src="/static/VotingPage.js"></script>
-<script src="/static/PlaylistSubmission.js"></script>    
-        
-    
+<script src="/static/PlaylistSubmission.js"></script>
+
+
 
 </html>

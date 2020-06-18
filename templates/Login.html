@@ -8,6 +8,9 @@
     <link rel="icon" type="image/png" href="/static/favicon.ico">
     <link rel="stylesheet" type="text/css" href="../static/util.css">
     <link rel="stylesheet" type="text/css" href="../static/main.css">
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/js-cookie@rc/dist/js.cookie.min.js"></script>
     <script src="https://sdk.usegripeless.com" async></script>
 </head>
 
@@ -22,51 +25,46 @@
 					The Banger Generator
 				</span><br>
                 <div class="text-center p-b-26">
-
-                    <div class="container-login100-form-btn">
-                        <div class="wrap-input100">
-                            <input class="input100" type="text" name="code" placeholder="Group Code">
-                            <span class="focus-input100"></span>
+                    <form action="/form/EnterCode" method="POST">
+                        <div class="container-login100-form-btn">
+                            <div class="wrap-input100">
+                                <input id="EnteredGroup" class="input100" name="GroupCode" type="text" name="code" placeholder="Group Code">
+                                <span class="focus-input100"></span>
+                            </div>
                         </div>
-                    </div>
 
-                    <div class="container-login100-form-btn">
-                        <div class="wrap-input100">
-                            <input class="input100" type="text" name="code" placeholder="Group Code" value="bC1hA3lQ8W" disabled>
-                            <span class="focus-input100"></span>
+                        <div class="wrap-login100-form-btn">
+                            <div class="login100-form-bgbtn"></div>
+                            <button type="submit" onclick="Submission()" class="login100-form-btn">
+                                Join Group
+                            </button>
                         </div>
-                    </div>
 
-                    <div class="wrap-login100-form-btn">
-                        <div class="login100-form-bgbtn"></div>
-                        <button onclick="Submission()" class="login100-form-btn">
-                            Join Group
-                        </button>
-                    </div>
+                        <div class="wrap-login100-form-btn">
+                            <div class="login100-form-bgbtn"></div>
+                            <button type="button" onclick="CreateAGroup()" class="login100-form-btn">
+                                Create A Group
+                            </button>
+                        </div>
 
-                    <div class="wrap-login100-form-btn">
-                        <div class="login100-form-bgbtn"></div>
-                        <button onclick="CreateAGroup()" class="login100-form-btn">
-                            Create A Group
-                        </button>
-                    </div>
+                        <div class="wrap-login100-form-btn">
+                            <div class="login100-form-bgbtn"></div>
+                            <button type="button" onclick="LeaveGroup()" class="login100-form-btn">
+                                Leave Group
+                            </button>
+                        </div>
+                    </form>
 
-                    <div class="wrap-login100-form-btn">
-                        <div class="login100-form-bgbtn"></div>
-                        <button onclick="LeaveGroup()" class="login100-form-btn">
-                            Leave Group
-                        </button>
-                    </div>
-
-                    <button onclick="Gripeless.modal('spotifygroupplaylist')">Found an issue?</button>
-
+                    <table style="width:100%" id="GroupTable"></table>
+                    <br />
+                    <button onclick="Gripeless.modal('spotifygroupplaylist') ">Found an issue?</button>
+                    <script src="/static/Login.js"></script>
                 </div>
             </div>
         </div>
     </div>
 
-    <script>
-    </script>
+
 
 </body>
 
