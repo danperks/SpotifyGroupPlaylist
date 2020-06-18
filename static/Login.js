@@ -7,42 +7,81 @@ function Logout() {
 }
 
 function LeaveGroup() {
+    sessionStorage.setItem("CurrentGroup", "");
+    sessionStorage.setItem("CurrentName", "");
+    location.reload();
+}
+
+function DeleteGroup() {
     GroupToLeave = document.getElementById("EnteredGroup").value;
     $.get("/Management/AbandonGroup", { GroupCode: GroupToLeave }).done(function() { RefreshGroups() });
+    sessionStorage.setItem("CurrentGroup", "");
+    sessionStorage.setItem("CurrentName", "");
+    location.reload();
 
 }
 
 function Submission() {
-    sessionStorage.setItem("CurrentGroup", document.getElementById("EnteredGroup").value); //set current group
+    code = document.getElementById("EnteredGroup").value
+    sessionStorage.setItem("CurrentGroup", code);
+    $.ajax("/api/UserGroups").done(function(data) {
+        console.log(data[0])
+        ind = data[0].indexOf(code)
+        sessionStorage.setItem("CurrentName", data[1][ind])
+    });
+    document.getElementById("joinform").submit();
 }
+
 
 function RefreshGroups() {
     $('#GroupTable').empty();
     $.ajax("/api/UserGroups").done(function(data) {
         var table = document.getElementById("GroupTable")
         var header = table.insertRow();
-        var h1 = header.insertCell(0).innerHTML = "Group Name".bold();
-        var h2 = header.insertCell(1).innerHTML = "Group Code".bold();
-        console.log(data);
+        header.insertCell(0).innerHTML = "Group Name".bold();
+        header.insertCell(1).innerHTML = "Group Code".bold();
         for (i = 0; i < data[0].length; i++) {
-
             var row = table.insertRow();
-            var cell1 = row.insertCell(0).innerHTML = data[1][i];
-            var cell2 = row.insertCell(1).innerHTML = data[0][i];
-
+            row.insertCell(0).innerHTML = data[1][i];
+            row.insertCell(1).innerHTML = data[0][i];
         }
-    })
-
-    return "Table Updated"
+    });
+    return "Table Updated";
 }
-$(document).ready(RefreshGroups());
+
+$(document).ready(
+    RefreshGroups());
 
 function CreateAGroup() {
     DeafultUserName = String(Cookies.get("UserId")) + "'s Group";
     GroupNameEntry = window.prompt("Enter A Group Name", DeafultUserName);
     if (GroupNameEntry) {
         $.post("/CreateGroup", { GroupName: GroupNameEntry }).done(function(data) {
-            alert("Your New Group is " + String(data));
+            alert("Your Playlist Code is: " + String(data));
+            sessionStorage.setItem("CurrentGroup", String(data))
+            sessionStorage.setItem("CurrentName", GroupNameEntry)
+            location.reload()
         });
     }
 }
+
+function onLoad() {
+    cur = sessionStorage.getItem("CurrentGroup");
+    CurrentName = sessionStorage.getItem("CurrentName");
+    if (cur == "") {
+        document.getElementById("votebut").style.display = "none";
+        document.getElementById("leavebut").style.display = "none";
+        document.getElementById("delbut").style.display = "none";
+        document.getElementById("status").innerHTML = "Not In Group";
+    } else if (cur != "") {
+        document.getElementById("joinbut").style.display = "none";
+        document.getElementById("createbut").style.display = "none";
+        document.getElementById("status").innerHTML = "Currently Editing " + CurrentName;
+        codein = document.getElementById("EnteredGroup");
+        codein.disabled = true;
+        codein.value = cur;
+    }
+
+}
+
+onLoad()

@@ -7,10 +7,13 @@ var CurrentSong = "";
 
 
 var CurrentGroup = sessionStorage.getItem("CurrentGroup");
+var CurrentName = sessionStorage.getItem("CurrentName");
 var StateOfCheckbox = false;
 var CurrentAudioTrack = "";
 console.log(CurrentGroup);
 $(document).ready(function() {
+    document.getElementById("playlistCode").innerHTML = "Playlist Code: " + CurrentGroup;
+    document.getElementById("playlistName").innerHTML = CurrentName;
     $.get('/ReturnSongsAwaitVote', { GroupId: CurrentGroup }).done(function(data) {
         SongsToVoteOn = [];
         CurrentSong = "";
@@ -19,28 +22,13 @@ $(document).ready(function() {
         //alert(SongsToVoteOn)
         NextSong();
         //console.log(SongsToVoteOn);
-        MakeButtonsLive();
-        CheckBoxStateCheck();
+        //CheckBoxStateCheck();
     }).fail(function(data) {
         alert("Your Session Has Likely Expired  - Redirecting to group selection page");
         window.location.replace("/");
     });
 });
 
-function MakeButtonsLive() { //probably should mess around with doing this propelry off a chain of promises / async funcitons etc, but acc that seems to work so , even if sketchy
-    if (SongsToVoteOn.length > 0) {
-        document.getElementById("AgainstButton").hidden = false;
-        document.getElementById("InFavourButton").hidden = false;
-        $("#AgainstButton").removeAttr("disabled");
-        $("#InFavourButton").removeAttr("disabled");
-        //,false);
-        //$("#InFavourButton").prop("disabled",false);
-        //alert(sessionStorage.getItem("CurrentGroup"));
-
-        //console.log(CurrentSong)
-    }
-    RefreshOutputPlaylist() // refreshes output on user log in
-}
 
 function VoteInFavour() {
     if (StateOfCheckbox) {
@@ -54,10 +42,6 @@ function VoteInFavour() {
     })
 }
 
-
-
-
-
 function VoteAgainst() {
     if (StateOfCheckbox) {
         var GroupValueToSendBack = "ALL";
@@ -65,7 +49,6 @@ function VoteAgainst() {
         var GroupValueToSendBack = CurrentGroup;
     }
     console.log("Current Votes Applicable To " + GroupValueToSendBack.toString())
-    document.getElementById("PreviewPlayer").pause();
     $.get('/VotesReturned', { VotesAgainst: JSON.stringify([CurrentSong]), GroupId: GroupValueToSendBack }).done(function(data) {
         NextSong();
     })
@@ -77,9 +60,10 @@ function NextSong() {
     //console.log("Next Song Called");
     if (SongsToVoteOn && SongsToVoteOn.length > 0) {
         CurrentSong = SongsToVoteOn.pop();
-        document.getElementById("VoteCount").innerHTML = String(SongsToVoteOn.length);
-        SetAlbumImage(CurrentSong);
-        GetThirtySecondAudio(CurrentSong);
+        document.getElementById("VoteCount").innerHTML = String(SongsToVoteOn.length + 1);
+        ifrm = document.getElementById("spotembed")
+        ifrm.src = "https://open.spotify.com/embed/track/" + String(CurrentSong);
+        ifrm.style.display = "block";
     } else {
         //Now at end of the list
         PackUpSendBack();
@@ -88,57 +72,15 @@ function NextSong() {
 
 }
 
-function SetAlbumImage(SongID) {
-    $.ajax({
-        url: "https://api.spotify.com/v1/tracks/" + String(SongID),
-        headers: {
-            'Authorization': 'Bearer ' + String(Cookies.get("AuthToken")),
-        },
-        success: function(response) {
-            document.getElementById("AlbumCover").src = response["album"]["images"][0]["url"];
-            document.getElementById("Artist").innerHTML = response["artists"][0]["name"]; // will only get first artist but you know where to go with that
-            document.getElementById("Title").innerHTML = response["name"]
-                // alert(Cookies.get("AuthToken"))
-        },
-        fail: function(response) {
-            console.log("Failure : " + String(response));
-        }
-    })
-}
-
-function GetThirtySecondAudio(SongID) {
-    $.ajax({
-        url: "https://api.spotify.com/v1/tracks/" + String(SongID) + "?market=from_token",
-        headers: {
-            'Authorization': 'Bearer ' + String(Cookies.get("AuthToken")),
-        },
-        success: function(response) {
-            console.log(response);
-            CurrentAudioTrack = response["preview_url"];
-            if (CurrentAudioTrack == null) {
-                $("#PreviewPlayer").hide();
-            } else {
-                $("#PreviewPlayer").show();
-                document.getElementById("PreviewPlayer").src = CurrentAudioTrack;
-            }
-        },
-        fail: function(response) {
-            console.log("Failure : " + String(response));
-        }
-
-    })
-
-    // alert(Cookies.get("AuthToken"))
-}
-
-
-
-
 function PackUpSendBack() {
     //alert("End Of List Reached");
-    HideElements();
+    //HideElements();
     RefreshOutputPlaylist();
     alert("End of Songs - Check back later to see if any more songs have been submitted");
+    document.getElementById("VoteCount").innerHTML = "0";
+    document.getElementById("voteyes").style.display = "none";
+    document.getElementById("voteno").style.display = "none";
+    document.getElementById("spotembed").style.display = "none";
     // add the check to see if all votes have been received
 
 }
@@ -154,10 +96,13 @@ function HideElements() {
 
 }
 
+function ManualRefresh() {
+    RefreshOutputPlaylist();
+    alert("The playlist has been recreated and updated successfully!");
+}
+
 function RefreshOutputPlaylist() {
-    $.get("/RefreshOutputPlaylist", { GroupId: CurrentGroup }).done(function() {
-        console.log("Output Playlist Refreshed");
-    })
+    $.get("/RefreshOutputPlaylist", { GroupId: CurrentGroup });
 }
 
 

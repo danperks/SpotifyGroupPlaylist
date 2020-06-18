@@ -96,16 +96,19 @@ def LoadIntoGroup():
         print("pass")
         if AddUserToGroup(UserID,GroupID):
             return redirect(("/VotingPage"))
-    return "Failure Loading Into Group"
+    return render_template("Badcode.html")
+
 @app.route("/VotingPage")
 def DisplayVotingPage():
     return render_template("VotingPage.html")
+
 @app.route("/Management/AbandonGroup",methods = ["GET"])
 def AbandonGroup():
     UserID = GetUserIDFromRefreshToken(str(request.cookies["RefreshToken"]))
     GroupCode = request.args["GroupCode"]
     if GroupCode:
         RemoveUserFromGroup(UserID,GroupCode)
+        print("Removed group " + str(GroupCode) + " successfully")
     return "True"
 
 @app.route("/SpotifyAuthorise") #Create a check to see if user is already registed, if they are then we need to call a refresh token rather than a new one

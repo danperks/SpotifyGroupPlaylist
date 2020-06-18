@@ -1,3 +1,16 @@
+/* Additional CSS */
+
+nav ul {
+    height: 200px;
+    width: 100%;
+    font-size: 15px;
+    overflow: hidden;
+    overflow-y: scroll;
+    cursor: pointer;
+    display: none;
+}
+
+
 /*//////////////////////////////////////////////////////////////////
 [ FONT ]*/
 
@@ -422,7 +435,7 @@ iframe {
 
 .btn-show-pass:hover {
     color: #6a7dfe;
-    color: -webkit-linear-gradient(right, #061700, #52c234);
+    color: -webkit-linear-gradient(right, #061700, #b9c234);
     color: -o-linear-gradient(right, #061700, #52c234);
     color: -moz-linear-gradient(right, #061700, #52c234);
     color: linear-gradient(right, #061700, #52c234);
@@ -467,11 +480,29 @@ iframe {
     z-index: -1;
     width: 300%;
     height: 100%;
-    background: #a64bf4;
+    background: #52c234;
     background: -webkit-linear-gradient(right, #061700, #52c234);
     background: -o-linear-gradient(right, #061700, #52c234);
     background: -moz-linear-gradient(right, #061700, #52c234);
     background: linear-gradient(right, #061700, #52c234);
+    top: 0;
+    left: -100%;
+    -webkit-transition: all 0.4s;
+    -o-transition: all 0.4s;
+    -moz-transition: all 0.4s;
+    transition: all 0.4s;
+}
+
+.login100-form-bgbtn-red {
+    position: absolute;
+    z-index: -1;
+    width: 300%;
+    height: 100%;
+    background: #bb1c1c;
+    background: -webkit-linear-gradient(right, #4e0c0c, #ff0000);
+    background: -o-linear-gradient(right, #4e0c0c, #ff0000);
+    background: -moz-linear-gradient(right, #4e0c0c, #ff0000);
+    background: linear-gradient(right, #4e0c0c, #ff0000);
     top: 0;
     left: -100%;
     -webkit-transition: all 0.4s;
@@ -502,13 +533,17 @@ iframe {
     left: 0;
 }
 
+.wrap-login100-form-btn:hover .login100-form-bgbtn-red {
+    left: 0;
+}
+
 
 /*------------------------------------------------------------------
 [ Responsive ]*/
 
 @media (max-width: 576px) {
     .wrap-login100 {
-        padding: 77px 15px 33px 15px;
+        padding: 35px 15px 33px 15px;
     }
 }
 
