@@ -153,7 +153,7 @@ def CreateGroupPlaylist(UserId,Name,UserAccessToken,description):
     bodyParameters={
         "name":str(Name),
         "public":"false",
-        "description":str(description)
+        "description":str(description)+str("A Playlist Created By Spotify Bangers")
     }
     
     r = requests.post("https://api.spotify.com/v1/users/"+UserId+"/playlists",headers=headers,data = json.dumps(bodyParameters)).json()

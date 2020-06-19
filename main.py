@@ -113,6 +113,10 @@ def RefreshPlaylist():
     AuthToken = str(request.cookies["AuthToken"])
     return NewPlaylistOutput(GroupId,AuthToken)
 
+""" @app.route('/outputtesting')
+def Testing():
+    AuthToken = str(request.cookies["AuthToken"])
+    return NewPlaylistOutput(groupcode,AuthToken) """
 
 @app.route("/ReturnUserPlaylists",methods = ["GET"])
 def ReturnUserPlaylists():
@@ -289,6 +293,9 @@ def AddUserToGroup(UserId,GroupId):## Adds user to group membership , creates re
                         print("Playlist Didnt Go through - spotify:playlist:" +str(output))
                         
             else:
+                SQLcursor.execute("SELECT \"Output\" FROM public.\"Groups\" WHERE \"GroupId\" IN %(GroupId)s",params)
+                output = SQLcursor.fetchall()[0][0]
+                FollowGroupPlaylist(output,request.cookies["AuthToken"])
                 return True
         else:
             print("flas")
@@ -382,7 +389,7 @@ def SetNewLeadUser(UserIdToDelete,GroupId):
             SQLcursor2 = conn.cursor()
             SQLcursor2.execute("SELECT \"RefreshToken\" FROM public.\"Users\" WHERE \"UserId\" IN %(NewUserLead)s",params)
             AccessToken = RefreshAccessToken(SQLcursor2.fetchall()[0][0])
-            AddOutputPlaylist(CreateGroupPlaylist(NewUserId,str(NewUserId)+"'s New Group",AccessToken,"Group Playlist"),GroupId)
+            AddOutputPlaylist(CreateGroupPlaylist(NewUserId,str(NewUserId)+"'s Replacement Group",AccessToken,"A Replacement Group Playlist"),GroupId)
             return True
     except:
         DatabaseRollback()
@@ -722,6 +729,7 @@ def NewPlaylistOutput(GroupId,AuthToken):
         for User in OutputArray:
             OutputArray[User][Song] = False
     ## ADD Votes In Db
+    
     if len(Songs)>0:
         for Vote in ReturnPostiveVotesForGroup(Songs,GroupId,UserArray):
             if Vote[2] == True:
@@ -743,7 +751,9 @@ def NewPlaylistOutput(GroupId,AuthToken):
     for User in OutputArray:
         OutputArray[User] ={ key : value for key,value in OutputArray[User].items() if key not in DeletedItems}
     #print(DeletedItems)
+    
     ArrayToSend = list(OutputArray[UserArray[0]].keys())
+    
     PushToNewPlaylistController(LeadUserAccessToken,ArrayToSend,OutputPlaylist,0,99)
     return jsonify(OutputArray)
 
