@@ -63,36 +63,43 @@ def OneTimeIsSongInLibrary(ListOfSpotifyID,UserAccessToken):## Same func ,but do
             return False
 
 def IsSongInUserLibrary(ListOfSpotifyID,UserAccessToken,start,end):
-    if start == len(ListOfSpotifyID):
-        return []
-    AlreadyPresent = []
-    headers = {
-        "Accept": "application/json",
-        "Content-Type": "application/json",
-        "Authorization":'Bearer '+UserAccessToken
-    }
-    bodyParameters={
-        "ids":",".join(ListOfSpotifyID[start:end])
-    }
+    try:
+        if start >= len(ListOfSpotifyID):
+            return []
+        if end>len(ListOfSpotifyID):
+            return []
+        if start == end:
+            return []
+        AlreadyPresent = []
+        headers = {
+            "Accept": "application/json",
+            "Content-Type": "application/json",
+            "Authorization":'Bearer '+UserAccessToken
+        }
+        bodyParameters={
+            "ids":",".join(ListOfSpotifyID[start:end])
+        }
+        
+        r= requests.get("https://api.spotify.com/v1/me/tracks/contains",headers=headers,params=bodyParameters)
+        
+        for item in ListOfSpotifyID[start:end]:
+            if r.json()[(ListOfSpotifyID.index(item,start,end)-start)] ==True:        
+                    AlreadyPresent.append(item)
+            else:
+                continue
+        if len(ListOfSpotifyID)<=(end+49):
+            AlreadyPresent=[*AlreadyPresent,*IsSongInUserLibrary(ListOfSpotifyID,UserAccessToken,end,len(ListOfSpotifyID))]
+        if len(ListOfSpotifyID)>(end+49):
+            AlreadyPresent=[*AlreadyPresent,*IsSongInUserLibrary(ListOfSpotifyID,UserAccessToken,end,(end+49))]
+        
+        return AlreadyPresent
+        #for every 50ID's
+        #send API Request
+        #if true add song ID to ArrayOfUserApproved
     
-    r= requests.get("https://api.spotify.com/v1/me/tracks/contains",headers=headers,params=bodyParameters)
-    print(r)
-    for item in ListOfSpotifyID[start:end]:
-       if r.json()[ListOfSpotifyID.index(item)-start] ==True:        
-            AlreadyPresent.append(item)
-            
-    if len(ListOfSpotifyID)<=end+49:
-        AlreadyPresent=[*AlreadyPresent,*IsSongInUserLibrary(ListOfSpotifyID,UserAccessToken,end,len(ListOfSpotifyID))]
-        #print(AlreadyPresent)
-    if len(ListOfSpotifyID)>end+49:
-        #print("lower")
-        AlreadyPresent=[*AlreadyPresent,*IsSongInUserLibrary(ListOfSpotifyID,UserAccessToken,end,(end+49))]
-       # print(AlreadyPresent)
-    
-    return AlreadyPresent
-    #for every 50ID's
-    #send API Request
-    #if true add song ID to ArrayOfUserApproved
+    except Exception as e:
+        print(e)
+        return AlreadyPresent
     
 
 def GetUsersLikedSongs(UserAccessToken):#Pagination - Deprecated
@@ -177,7 +184,8 @@ def GetItemsInPlaylist(PlaylistId,UserAccessToken,ReturnAsSet=False):
         length = int(r["total"])
         if ReturnAsSet == False:        
             for item in r["items"]:
-                SongIds.append(item["track"]["id"])
+                if item["is_local"] == False:
+                    SongIds.append(item["track"]["id"])
             offset = offset+99
             if offset >length:## can see a logic error coming a mile off here , shouldnt do this at 1215 am
                 break
@@ -207,11 +215,34 @@ def DoesPlaylistExist(PlaylistId,AccessToken): ## check the string actually exis
 
 def PushToNewPlaylistController(UserAccessToken,ArrayOfSongs,PlaylistId,start,end):
     IsSongInPlaylist = GetItemsInPlaylist(PlaylistId,UserAccessToken,True)
-    #print(IsSongInPlaylist)
     print("Current Amount in Playlist = " +  str(len(IsSongInPlaylist)))
+    SongsToDelete = [i for i in IsSongInPlaylist if i not in ArrayOfSongs]
+    print("After Deletion " + str(len(DeleteFromPlaylist(UserAccessToken,SongsToDelete,PlaylistId,start,end))))
+    #print(IsSongInPlaylist)
+    
     ArrayOfSongs = [i for i in ArrayOfSongs if i not in IsSongInPlaylist]
+    
     #print("After " +str(len(ArrayOfSongs)))
     return  PushToNewPlaylist(UserAccessToken,ArrayOfSongs,PlaylistId,start,end)
+
+
+def DeleteFromPlaylist(UserAccessToken,ArrayOfSongs,PlaylistId,start,end):
+    if start == len(ArrayOfSongs):
+        return []
+    AlreadyPresent = []
+    ArrayToSendOff = ["spotify:track:" + s for s in ArrayOfSongs[start:end]]## wonders why array is seemingly overwritten, doesnt see it, finds array being over written * owo shocked pikachu*
+    headers = {
+        "Accept": "application/json",
+        "Authorization":'Bearer '+UserAccessToken
+    }
+    params = {"uris":ArrayToSendOff} ## might check later if this is inclusive or not , in which case somethign will have to be done
+    r= requests.delete("https://api.spotify.com/v1/playlists/"+str(PlaylistId)+"/tracks",headers=headers,json=params)
+    if len(ArrayOfSongs)<=end+99:
+        DeleteFromPlaylist(UserAccessToken,ArrayOfSongs,PlaylistId,end,len(ArrayOfSongs))
+    if len(ArrayOfSongs)>end+99:
+        DeleteFromPlaylist(UserAccessToken,ArrayOfSongs,PlaylistId,end,(end+99))
+    
+    return AlreadyPresent
 
 def PushToNewPlaylist(UserAccessToken,ArrayOfSongs,PlaylistId,start,end):
     if start == len(ArrayOfSongs):
