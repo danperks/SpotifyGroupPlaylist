@@ -68,7 +68,7 @@ function CreateAGroup() {
 function onLoad() {
     cur = sessionStorage.getItem("CurrentGroup");
     CurrentName = sessionStorage.getItem("CurrentName");
-    if (cur == "") {
+    if (cur == "" || cur == null) {
         document.getElementById("votebut").style.display = "none";
         document.getElementById("leavebut").style.display = "none";
         document.getElementById("delbut").style.display = "none";
