@@ -77,10 +77,7 @@ function PackUpSendBack() {
     //HideElements();
     RefreshOutputPlaylist();
     alert("End of Songs - Check back later to see if any more songs have been submitted");
-    document.getElementById("VoteCount").innerHTML = "0";
-    document.getElementById("voteyes").style.display = "none";
-    document.getElementById("voteno").style.display = "none";
-    document.getElementById("spotembed").style.display = "none";
+    alert("End of Songs - Check back later to see if any more songs have been submitted");
     // add the check to see if all votes have been received
 
 }

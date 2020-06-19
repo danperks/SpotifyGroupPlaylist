@@ -16,6 +16,7 @@ from spotifyMethods import *
 import random
 import string
 import secrets
+import threading
 
 if 'DATABASE_URL' in os.environ:
     from config import *
@@ -115,11 +116,12 @@ def AbandonGroup():
 def SpotifyLogIn():
         return redirect(ApplicationVerification())
 
-@app.route("/RefreshOutputPlaylist",methods= ["GET"])
+@app.route("/RefreshOutputPlaylist", methods=["GET"])
 def RefreshPlaylist():
     GroupId = str(request.args["GroupId"])
     AuthToken = str(request.cookies["AuthToken"])
-    return NewPlaylistOutput(GroupId,AuthToken)
+    threading.Thread(target=NewPlaylistOutput, args=[GroupId,AuthToken]).start()
+    return "Done"
 
 """ @app.route('/outputtesting')
 def Testing():
@@ -129,6 +131,7 @@ def Testing():
 @app.route("/ReturnUserPlaylists",methods = ["GET"])
 def ReturnUserPlaylists():
     return GetUsersPlaylists(request.cookies["AuthToken"]) ## not an important enough ,  can rely on a cookie 
+
 @app.route("/RecordNewPlaylist",methods = ["POST"])
 def PlaylistRecord():
     PlaylistId = escape(request.form["PlaylistId"])
@@ -762,9 +765,7 @@ def NewPlaylistOutput(GroupId,AuthToken):
     #print(DeletedItems)
     
     ArrayToSend = list(OutputArray[UserArray[0]].keys())
-    
     PushToNewPlaylistController(LeadUserAccessToken,ArrayToSend,OutputPlaylist,0,99)
-    return jsonify(OutputArray)
 
 
 
