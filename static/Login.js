@@ -22,28 +22,37 @@ function DeleteGroup() {
 }
 
 function Submission() {
-    code = document.getElementById("EnteredGroup").value
+    code = document.getElementById("EnteredGroup").value;
     sessionStorage.setItem("CurrentGroup", code);
     $.ajax("/api/UserGroups").done(function(data) {
-        console.log(data[0])
+        console.log(data)
         ind = data[0].indexOf(code)
-        sessionStorage.setItem("CurrentName", data[1][ind])
+        if (data.length > 1) {
+            sessionStorage.setItem("CurrentName", data[1][ind]);
+        } else {
+            sessionStorage.setItem("CurrentName", "New Group");
+        }
+        document.getElementById("joinform").submit();
     });
-    document.getElementById("joinform").submit();
 }
 
 
 function RefreshGroups() {
     $('#GroupTable').empty();
     $.ajax("/api/UserGroups").done(function(data) {
-        var table = document.getElementById("GroupTable")
+        var table = document.getElementById("GroupTable");
         var header = table.insertRow();
         header.insertCell(0).innerHTML = "Group Name".bold();
         header.insertCell(1).innerHTML = "Group Code".bold();
-        for (i = 0; i < data[0].length; i++) {
-            var row = table.insertRow();
-            row.insertCell(0).innerHTML = data[1][i];
-            row.insertCell(1).innerHTML = data[0][i];
+        if (data.length > 1) {
+            for (i = 0; i < data[0].length; i++) {
+                var row = table.insertRow();
+                row.insertCell(0).innerHTML = data[1][i];
+                row.insertCell(1).innerHTML = data[0][i];
+            }
+        } else {
+            table.style.display = "None";
+            document.getElementById("groups").innerHTML = "No Groups Found";
         }
     });
     return "Table Updated";

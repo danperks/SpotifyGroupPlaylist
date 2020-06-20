@@ -63,6 +63,7 @@ function NextSong() {
         document.getElementById("VoteCount").innerHTML = String(SongsToVoteOn.length + 1);
         ifrm = document.getElementById("spotembed")
         ifrm.src = "https://open.spotify.com/embed/track/" + String(CurrentSong);
+        document.getElementById("placeholder").style.display = "none";
         ifrm.style.display = "block";
     } else {
         //Now at end of the list
@@ -76,7 +77,10 @@ function PackUpSendBack() {
     //alert("End Of List Reached");
     //HideElements();
     RefreshOutputPlaylist();
-    alert("End of Songs - Check back later to see if any more songs have been submitted");
+    document.getElementById("VoteCount").innerHTML = "0";
+    document.getElementById("voteyes").style.display = "none";
+    document.getElementById("voteno").style.display = "none";
+    document.getElementById("spotembed").style.display = "none";
     alert("End of Songs - Check back later to see if any more songs have been submitted");
     // add the check to see if all votes have been received
 

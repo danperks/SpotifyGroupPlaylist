@@ -149,6 +149,7 @@ def PlaylistRecord():
     else:
         print("Does not exits")
         return "False"
+    
 @app.route("/VotesReturned",methods = ["GET"])
 def VotesReturned():## function originally designed to process all votes at once, but doign one individually will work , not a big enough priority to refine further
     UserID = GetUserIDFromRefreshToken(request.cookies["RefreshToken"])
@@ -478,6 +479,7 @@ def AddOutputPlaylist(PlaylistUrl,GroupId):
     except:
         DatabaseRollback()
         return render_template("index.html")
+    
 def GetOutputPlaylist(GroupId):
     try:
         #SQLcursor = GetNewSQLCursor().cursor()
