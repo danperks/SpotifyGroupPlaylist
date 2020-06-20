@@ -67,7 +67,7 @@ def SpotifyCallBack(): # Spotify Logins in the user, user redirected to the grou
     
 @app.errorhandler(KeyError)
 def IncorrectKeyError(e):
-    indexStart()
+    #indexStart()
     print("Inccorrect key error")
     return jsonify(error=str(e)),440
     
@@ -126,8 +126,8 @@ def RefreshPlaylist():
 """ @app.route('/outputtesting')
 def Testing():
     AuthToken = str(request.cookies["AuthToken"])
-    return NewPlaylistOutput(groupcode,AuthToken) """
-
+    return NewPlaylistOutput("7X4QtfBfFV",AuthToken)
+ """
 @app.route("/ReturnUserPlaylists",methods = ["GET"])
 def ReturnUserPlaylists():
     return GetUsersPlaylists(request.cookies["AuthToken"]) ## not an important enough ,  can rely on a cookie 
@@ -750,8 +750,11 @@ def NewPlaylistOutput(GroupId,AuthToken):
                 OutputArray[Vote[1]][Vote[0]] = Vote[2]
     PlaylistVotes = ReturnSongsInSubmittedPlaylist(GroupId,AuthToken)
     for User in PlaylistVotes:
-        for item in PlaylistVotes[User]:
-            OutputArray[User][item] = True
+        if User in UserArray:
+            for item in PlaylistVotes[User]:
+                OutputArray[User][item] = True
+        else:
+            continue;
     for User in OutputArray:
         UserSongsToSend =[]
         for key,val in OutputArray[User].items():
