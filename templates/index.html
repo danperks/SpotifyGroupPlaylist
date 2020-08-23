@@ -1,18 +1,51 @@
-<!doctype html>
-<html>
+<!DOCTYPE html>
+<html lang="en">
+
 <head>
-    <title>Spotify Group Bangers</title>
+    <title>Spotify Group Bangers - Login</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="icon" type="image/png" href="/static/favicon.ico">
+    <link rel="stylesheet" type="text/css" href="../static/util.css">
     <link rel="stylesheet" type="text/css" href="../static/main.css">
-    <meta name="viewport" content="width=device-width, initial-scale=1"> 
 </head>
-<body class="central-y-child">
-    <div class="container" style="margin-bottom: 4em;">
-        <div class="logo central-x">
-            <img class="logo central-x" src="../static/logo.png" alt="logo">
+
+<body>
+    <a class="dropdown" href="/"> Home </a>
+    <a class="login" href="/login"> Log In </a>
+    <div class="limiter">
+        <div class="container-login100">
+            <div class="wrap-login100">
+                <img src="https://www.freepnglogos.com/uploads/spotify-logo-png/spotify-download-logo-30.png" class="middleimage">
+                <span class="login100-form-title">
+					The Banger Generator
+				</span><br>
+                <div class="text-center p-b-26">
+                    <span class="txt1 ">
+                        Make a playlist with all your group's favourite bangers. <br /> 
+                        <br />
+                        <br />
+                        <h3>How To Use</h3>
+                        1 - Use the button below to get logged in with Spotify <br />
+                        2 - Either create a new group, or load into an exsisting group with their code<br />
+                        <br /><br />
+                        
+                        <div class="container-login100-form-btn">
+                            <div class="wrap-login100-form-btn">
+                                <div class="login100-form-bgbtn"></div>
+                                <button onclick="window.location.href='\SpotifyAuthorise'" class="login100-form-btn">
+                                    Sign In with Spotify
+                                </button>
+                            </div>
+                        </div>
+                    </span>
+                </div>
+            </div>
         </div>
-        <div style="margin-top:50px;">
-            <button onclick="location.href = '\SpotifyAuthorise';" class="login-button central-x">Authorise With Spotify</button>
-        </div>
-    </div>
+
+        <script>
+        </script>
+
 </body>
+
 </html>

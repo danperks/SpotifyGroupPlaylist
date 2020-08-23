@@ -1,38 +1,85 @@
-<!doctype html>
-<html>
+<!DOCTYPE html>
+<html lang="en">
+
 <head>
     <title>Spotify Group Bangers</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" type="text/css" href="/static/main.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="icon" type="image/png" href="/static/favicon.ico">
+    <link rel="stylesheet" type="text/css" href="../static/util.css">
+    <link rel="stylesheet" type="text/css" href="../static/main.css">
+
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/js-cookie@rc/dist/js.cookie.min.js"></script>
+    <script src="https://sdk.usegripeless.com" async></script>
 </head>
-<body class="central-y-child" style="justify-content:normal">
-    <div class="group container central-y-child central-x" style="padding: 1em 0.5em">
-        <div class="logo">
-            <img class="logo" src="../static/logo.png" alt="logo" style="max-width: 15em;align-self: center;">
-        </div>
-        <div class="input">
-            <form action = "/form/EnterCode" method = "POST">
-                <input class="group-input" type="text" id="EnteredGroup" name="GroupCode" placeholder="Enter Group Code">
-                <br>
-                <button onclick = "Submission()" type="submit" class="group-input" style="overflow:hidden"> Load Into Group</button>
-                <button onclick="CreateAGroup()" type ="button" class="group-input" style="overflow:hidden"> Create A Group</button>
-                <button onclick = "LeaveGroup()" type="button" class = "group-input" style="overflow:hidden">Leave Group</button>
-                
-            </form>
-        </div>
-        <div class="table">
-            <table id = "GroupTable">
-                <th>Group Name</th>
-                <th>Group Id</th>
-            </table>
-        </div>
-        <div class="user-actions">
-            <button onclick="Logout()" class="logout-button">Logout</button>
+
+<body>
+    <a class="dropdown" href="/"> Home </a>
+    <a class="login" onclick="Logout()"> Log Out </a>
+    <div class="limiter">
+        <div class="container-login100">
+            <div class="wrap-login100">
+                <img src="https://www.freepnglogos.com/uploads/spotify-logo-png/spotify-download-logo-30.png" class="middleimage">
+                <span class="login100-form-title">
+					The Banger Generator</span>
+                <div class="text-center p-b-26">
+                    <form id="joinform" action="/form/EnterCode" method="POST">
+                        <b id="status" style="padding: 0px;"></b>
+                        <div id="codeinput" class="container-login100-form-btn">
+                            <div class="wrap-input100">
+                                <input id="EnteredGroup" class="input100" name="GroupCode" type="text" name="code" placeholder="Group Code">
+                                <span class="focus-input100"></span>
+                            </div>
+                        </div>
+
+                        <div id="joinbut" class="wrap-login100-form-btn">
+                            <div class="login100-form-bgbtn"></div>
+                            <button type="button" onclick="Submission()" class="login100-form-btn">
+                                Join Group
+                            </button>
+                        </div>
+
+                        <div id="createbut" class="wrap-login100-form-btn">
+                            <div class="login100-form-bgbtn"></div>
+                            <button type="button" onclick="CreateAGroup()" class="login100-form-btn">
+                                Create A Group
+                            </button>
+                        </div>
+
+                        <div id="votebut" class="wrap-login100-form-btn">
+                            <div class="login100-form-bgbtn"></div>
+                            <button type="button" onclick="window.location.href = '/VotingPage'" class="login100-form-btn">
+                                Go to Voting
+                            </button>
+                        </div>
+
+                        <div id="leavebut" class="wrap-login100-form-btn">
+                            <div class="login100-form-bgbtn"></div>
+                            <button type="button" onclick="LeaveGroup()" class="login100-form-btn">
+                                Leave Session
+                            </button>
+                        </div>
+
+                        <div id="delbut" class="wrap-login100-form-btn">
+                            <div class="login100-form-bgbtn"></div>
+                            <button type="button" onclick="DeleteGroup()" class="login100-form-btn">
+                                Leave Group
+                            </button>
+                        </div>
+                    </form>
+
+                    <br /><b id="groups" style="font-size: 20px">Your Groups:</b>
+                    <table style="width:100%; table-layout: fixed;" id="GroupTable"></table>
+                    <br />
+                    <button onclick="Gripeless.modal('spotifygroupplaylist') ">Found an issue?</button>
+                    <script src="/static/Login.js"></script>
+                    <script src="https://cdn.jsdelivr.net/npm/js-cookie@rc/dist/js.cookie.min.js"></script>
+                </div>
+            </div>
         </div>
     </div>
+
 </body>
-<script src="/static/Login.js">   
-</script>
+
 </html>

@@ -13,11 +13,15 @@ from flask import jsonify
 from flask import escape
 from flask import json, session
 from spotifyMethods import *
-from config import *
 import random
 import string
 import secrets
+import threading
 
+if 'DATABASE_URL' in os.environ:
+    from config import *
+else:
+    from localconfig import *
 
 app = Flask(__name__)
 app.static_folder = "static"
@@ -35,6 +39,7 @@ def GetNewSQLCursor():
 @app.route('/favicon.ico')    
 def icon():
     return send_file("./static/favicon.ico", mimetype='image/ico')
+
 @app.route("/CreateGroup",methods=["POST"])
 def CreateGroup():
     NewGroupName = request.form["GroupName"]
@@ -43,7 +48,7 @@ def CreateGroup():
 
     #return PlaylistOutput("J9r9J30pwi",str(request.cookies["AuthToken"]))
    
-
+     
 @app.route("/SpotifyCallback")
 def SpotifyCallBack(): # Spotify Logins in the user, user redirected to the group entry page
     userReturnedCode = request.args["code"]
@@ -52,29 +57,37 @@ def SpotifyCallBack(): # Spotify Logins in the user, user redirected to the grou
         return render_template("index.html")
     AuthToken = GetAuthoristaionToken(userReturnedCode)
     RefreshToken = AuthToken["refresh_token"]#tokens expire after one hour
-    resp = make_response(render_template("Login.html"))
-    resp.set_cookie("RefreshToken",RefreshToken)
-    resp.set_cookie("UserId",GetUserID(AuthToken["access_token"]))
-    resp.set_cookie("AuthToken",AuthToken["access_token"])
+
+    resp = make_response(redirect("/"))
+    resp.set_cookie("RefreshToken",RefreshToken,samesite="lax")
+    resp.set_cookie("UserId",GetUserID(AuthToken["access_token"]),samesite="lax")
+    resp.set_cookie("AuthToken",AuthToken["access_token"],samesite="lax")
     AddUpdateUserRefreshToken(GetUserID(AuthToken["access_token"]),RefreshToken)##Used to add a new user to the database
     return resp
     
 @app.errorhandler(KeyError)
 def IncorrectKeyError(e):
+    #indexStart()
+    print("Inccorrect key error")
     return jsonify(error=str(e)),440
     
 @app.route("/")#index - start page, user asked to either authorise with spotify - or automatic forward to group entry
 def indexStart():
-    if "RefreshToken" in request.cookies:
-        print(request.cookies)
-        print("Cookie Present")#just check for the token
-        PreviousAuthorisation = IsThisStillValid(request.cookies["RefreshToken"])        
-        resp = make_response(render_template("Login.html"))
-        resp.set_cookie("AuthToken",RefreshAccessToken(PreviousAuthorisation))
-        return resp
-    else:
-        print("No Cookie Present")
-        return render_template("index.html")   
+    try:
+        if "RefreshToken" in request.cookies:
+            print(request.cookies)
+            print("Cookie Present")#just check for the token
+            PreviousAuthorisation = IsThisStillValid(request.cookies["RefreshToken"])
+            if PreviousAuthorisation == False:
+                return redirect("/SpotifyAuthorise")      
+            resp = make_response(render_template("Login.html"))
+            resp.set_cookie("AuthToken",RefreshAccessToken(PreviousAuthorisation),samesite="lax")
+            return resp
+        else:
+            print("No Cookie Present")
+            return render_template("index.html")
+    except:
+           return render_template("index.html")
 
 @app.route("/form/EnterCode",methods=["POST"])
 def LoadIntoGroup():
@@ -83,29 +96,42 @@ def LoadIntoGroup():
     if DoesGroupExist(GroupID) == True:
         print("pass")
         if AddUserToGroup(UserID,GroupID):
-            return render_template("VotingPage.html")
-    return "Failure Loading Into Group"
+            return redirect(("/VotingPage"))
+    return render_template("Badcode.html")
+
+@app.route("/VotingPage")
+def DisplayVotingPage():
+    return render_template("VotingPage.html")
+
 @app.route("/Management/AbandonGroup",methods = ["GET"])
 def AbandonGroup():
     UserID = GetUserIDFromRefreshToken(str(request.cookies["RefreshToken"]))
     GroupCode = request.args["GroupCode"]
     if GroupCode:
         RemoveUserFromGroup(UserID,GroupCode)
+        print("Removed group " + str(GroupCode) + " successfully")
     return "True"
+
 @app.route("/SpotifyAuthorise") #Create a check to see if user is already registed, if they are then we need to call a refresh token rather than a new one
 def SpotifyLogIn():
         return redirect(ApplicationVerification())
 
-@app.route("/RefreshOutputPlaylist",methods= ["GET"])
+@app.route("/RefreshOutputPlaylist", methods=["GET"])
 def RefreshPlaylist():
     GroupId = str(request.args["GroupId"])
     AuthToken = str(request.cookies["AuthToken"])
-    return NewPlaylistOutput(GroupId,AuthToken)
+    threading.Thread(target=NewPlaylistOutput, args=[GroupId,AuthToken]).start()
+    return "Done"
 
-
+""" @app.route('/outputtesting')
+def Testing():
+    AuthToken = str(request.cookies["AuthToken"])
+    return NewPlaylistOutput("7X4QtfBfFV",AuthToken)
+ """
 @app.route("/ReturnUserPlaylists",methods = ["GET"])
 def ReturnUserPlaylists():
     return GetUsersPlaylists(request.cookies["AuthToken"]) ## not an important enough ,  can rely on a cookie 
+
 @app.route("/RecordNewPlaylist",methods = ["POST"])
 def PlaylistRecord():
     PlaylistId = escape(request.form["PlaylistId"])
@@ -123,6 +149,7 @@ def PlaylistRecord():
     else:
         print("Does not exits")
         return "False"
+    
 @app.route("/VotesReturned",methods = ["GET"])
 def VotesReturned():## function originally designed to process all votes at once, but doign one individually will work , not a big enough priority to refine further
     UserID = GetUserIDFromRefreshToken(request.cookies["RefreshToken"])
@@ -186,10 +213,12 @@ def page_not_found_error(e):
 
 def IsThisStillValid(RefreshTokenToCheck):
     try:
-        GetUserIDFromRefreshToken(RefreshTokenToCheck)
-        return RefreshTokenToCheck
+        if GetUserIDFromRefreshToken(RefreshTokenToCheck):
+            return RefreshTokenToCheck
+        else:
+            return False ## think thats a bit sketchy but hoping wont cause problmes
     except KeyError:
-        return render_template("index.html")
+        return render_template("old.html")
     
 def GetSongs(UserId,GroupId,AuthToken):
     Playlists = ReturnGroupPropostionPlaylists(UserId,GroupId)
@@ -224,6 +253,7 @@ def DoesGroupExist(GroupId):
         print(e)
         DatabaseRollback()
         return render_template("index.html")
+    
 def DoesUserExist(UserId):
     try:
         #SQLcursor = GetNewSQLCursor()
@@ -269,10 +299,16 @@ def AddUserToGroup(UserId,GroupId):## Adds user to group membership , creates re
                     SQLcursor.execute("INSERT INTO public.\"Memberships\"(\"GroupId\", \"UserId\") VALUES (%(GroupId)s, %(UserId)s);",params)
                     conn.commit()
                     SQLcursor.execute("SELECT \"Output\" FROM public.\"Groups\" WHERE \"GroupId\" IN %(GroupId)s",params)
-                    print(SQLcursor.fetchall())
-                    if FollowGroupPlaylist(SQLcursor.fetchall()[0],request.cookies["AuthToken"]):
+                    output = SQLcursor.fetchall()[0][0]
+                    if FollowGroupPlaylist(output,request.cookies["AuthToken"]):
                         return True
+                    else:
+                        print("Playlist Didnt Go through - spotify:playlist:" +str(output))
+                        
             else:
+                SQLcursor.execute("SELECT \"Output\" FROM public.\"Groups\" WHERE \"GroupId\" IN %(GroupId)s",params)
+                output = SQLcursor.fetchall()[0][0]
+                FollowGroupPlaylist(output,request.cookies["AuthToken"])
                 return True
         else:
             print("flas")
@@ -299,7 +335,7 @@ def CreateNewGroup(UserId,NewGroupName):
         conn.commit()
         print("Group Created")
         AddUserToGroup(UserID,GroupId)
-        # return (True,GroupId)
+        return (True,GroupId)
     except Exception as e:
         print(e)
         DatabaseRollback()
@@ -366,7 +402,7 @@ def SetNewLeadUser(UserIdToDelete,GroupId):
             SQLcursor2 = conn.cursor()
             SQLcursor2.execute("SELECT \"RefreshToken\" FROM public.\"Users\" WHERE \"UserId\" IN %(NewUserLead)s",params)
             AccessToken = RefreshAccessToken(SQLcursor2.fetchall()[0][0])
-            AddOutputPlaylist(CreateGroupPlaylist(NewUserId,str(NewUserId)+"'s New Group",AccessToken,"Group Playlist"),GroupId)
+            AddOutputPlaylist(CreateGroupPlaylist(NewUserId,str(NewUserId)+"'s Replacement Group",AccessToken,"A Replacement Group Playlist"),GroupId)
             return True
     except:
         DatabaseRollback()
@@ -443,6 +479,7 @@ def AddOutputPlaylist(PlaylistUrl,GroupId):
     except:
         DatabaseRollback()
         return render_template("index.html")
+    
 def GetOutputPlaylist(GroupId):
     try:
         #SQLcursor = GetNewSQLCursor().cursor()
@@ -484,6 +521,7 @@ def ReturnGroupPropostionPlaylists(UserId,GroupId):
         return render_template("index.html")
 def GetUserIDFromRefreshToken(Refresh_Token):
     try:
+        print("called 492")
         SQLcursor2 = conn.cursor();
         params = {"RefreshToken":tuple([Refresh_Token])}
         SQLcursor2.execute("SELECT \"UserId\" FROM public.\"Users\" WHERE \"RefreshToken\" in %(RefreshToken)s",params)
@@ -705,13 +743,18 @@ def NewPlaylistOutput(GroupId,AuthToken):
         for User in OutputArray:
             OutputArray[User][Song] = False
     ## ADD Votes In Db
-    for Vote in ReturnPostiveVotesForGroup(Songs,GroupId,UserArray):
-        if Vote[2] == True:
-            OutputArray[Vote[1]][Vote[0]] = Vote[2]
+    
+    if len(Songs)>0:
+        for Vote in ReturnPostiveVotesForGroup(Songs,GroupId,UserArray):
+            if Vote[2] == True:
+                OutputArray[Vote[1]][Vote[0]] = Vote[2]
     PlaylistVotes = ReturnSongsInSubmittedPlaylist(GroupId,AuthToken)
     for User in PlaylistVotes:
-        for item in PlaylistVotes[User]:
-            OutputArray[User][item] = True
+        if User in UserArray:
+            for item in PlaylistVotes[User]:
+                OutputArray[User][item] = True
+        else:
+            continue;
     for User in OutputArray:
         UserSongsToSend =[]
         for key,val in OutputArray[User].items():
@@ -725,9 +768,9 @@ def NewPlaylistOutput(GroupId,AuthToken):
     for User in OutputArray:
         OutputArray[User] ={ key : value for key,value in OutputArray[User].items() if key not in DeletedItems}
     #print(DeletedItems)
+    
     ArrayToSend = list(OutputArray[UserArray[0]].keys())
     PushToNewPlaylistController(LeadUserAccessToken,ArrayToSend,OutputPlaylist,0,99)
-    return jsonify(OutputArray)
 
 
 
@@ -770,10 +813,10 @@ def ExceptionHandler(ExceptionData):
     return "s"
 
 if __name__ == "__main__":
-    from waitress import serve
+    #from waitress import serve
     port = int(os.environ.get("PORT",5000))
-    serve(app,host= '0.0.0.0',port=port)
-    #debug = True
+    #serve(app,host= '0.0.0.0',port=port)
+    debug = True
     
-    #app.run(host= '0.0.0.0',port=port,debug=debug)
+    app.run(host= '0.0.0.0',port=port,debug=debug)
     

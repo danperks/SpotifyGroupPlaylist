@@ -1,57 +1,97 @@
-<!doctype html>
-<html>
+<!DOCTYPE html>
+<html lang="en">
+
 <head>
     <title>Spotify Group Bangers</title>
-    <meta name="viewport" content="width=device-width, initial-scale=0.8"> 
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, height=device-height initial-scale=1">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+    <link rel="icon" type="image/png" href="/static/favicon.ico">
+    <link rel="stylesheet" type="text/css" href="../static/util.css">
     <link rel="stylesheet" type="text/css" href="../static/main.css">
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script> 
-        
 </head>
-<body class="central-y-child">
-    
-    <div class="song container" id="divHide">
-        <img id="AlbumCover" style="height:25em;width: 25em;"></img>
-        <div class="song-preview">
-            <audio id="PreviewPlayer" controls></audio>
-                
 
-        </div>
-        <div class="song-details">
-            <span id = "Artist" class="artist"></span>
-            <span id = "Title" class="title"></span>
-        </div>
-        <div class="song-vote">
-            <button id = "InFavourButton" onclick = "VoteInFavour()" hidden = "true" disabled="disabled">Banger</button>
-            <button id = "AgainstButton" onclick = "VoteAgainst()"  hidden = "true" disabled="disabled">Dud</button>
-            
-        </div>
-        
-        <input id="VotesPermanent" type="checkbox" onclick="CheckBoxStateCheck()"><span> Keep My Votes Visible For All Groups</span>
-        <span>
-            <a> Amount Of Songs Left</a>
-            <a id="VoteCount"></a>
-            <a id ="PreviewUrl"></a>
-        </span>
-    </div>
-    <button id = "SubmitAPlaylist" onclick="PlaylistBoxLoad()">Submit A Playlist</button>
-    <button id = "RefreshOutput" onclick="RefreshOutputPlaylist()">Refresh Output Playlist </button>
-    <div id="SubmissionOverlay">  
-        <div class="modal-content">
-            <input id="UserPlaylistTyping" type="text" name="PlaylistEntry" placeholder="Enter Your Playlist">
-            <button onclick = "Playlist(UserPlaylistTyping.value)"> Submit</button>
-            <ul id = "TableOfPlaylists" style = "list-style-type:none;">
+<body>
+    <a class="dropdown" href="/"> Home </a>
+    <a class="login" href="/login"> Log In </a>
+    <div class="limiter">
+        <div class="container-login100">
+            <div class="wrap-login100">
+                <span id="playlistName" class="login100-form-title">
+					Playlist Name
+                </span>
+                <div class="text-center p-b-26">
+                    <span class="txt1">
+                        <b id="playlistCode" style="font-size: 17px; padding-top: 7px;"> Playlist Code: N/A</b><br />
+                        <b style="font-size: 17px">Song's left to vote on: <a id="VoteCount">0</a> </b><br />
+                </span>
+                    <div>
+                        <div id="placeholder" style="width: 100%; height: 440px; "></div>
+                        <iframe id="spotembed" src="" width="80%" height="400px" style="margin: 20px auto; display: none;" frameborder="0 " allowtransparency="true" allow="encrypted-media"></iframe>
+                    </div>
+                    <span class="txt1 ">                        
+                        <div id="voteyes" class="container-login100-form-btn" style="display: inline-block; width: 45%; padding-right:10px">
+                            <div class="wrap-login100-form-btn ">
+                                <div class="login100-form-bgbtn "></div>
+                                <button onclick="VoteInFavour()" class="login100-form-btn ">
+                                    Yes
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div id="voteno" class="container-login100-form-btn" style="display: inline-block; width: 45%; padding-left:10px">
+                            <div class="wrap-login100-form-btn ">
+                                <div class="login100-form-bgbtn-red "></div>
+                                <button onclick="VoteAgainst()" class="login100-form-btn">
+                                    No
+                                </button>
+                            </div>
+                        </div>
 
-            </ul>
+                        <div class="container-login100-form-btn">
+                            <div class="wrap-input100" style="margin: 0px; width: 90%;">
+                                <input id="toSuggestURL" class="input100" name="toSuggestURL" type="text" name="code" placeholder="Enter a song or playlist URL">
+                                <span class="focus-input100">
+                            </div>
+                        </div>
+
+                        <div class="container-login100-form-btn" style="width: 90%; display: inline-block">
+                            <div class="wrap-login100-form-btn ">
+                            <div class="login100-form-bgbtn "></div>
+                            <button onclick="alert('Suggested: ' + document.getElementById('toSuggestURL').value)" class="login100-form-btn ">
+                                Suggest this link
+                            </button>
+                            </div>
+                        </div>
+
+                       
+
+
+                        <div class="container-login100-form-btn" style="width: 90%; display: inline-block">
+                            <div class="wrap-login100-form-btn ">
+                                <div class="login100-form-bgbtn "></div>
+                                <button id="showPlaylists" onclick="togglePlaylists()" class="login100-form-btn">
+                                    Load Your Playlists
+                                </button>
+                            </div>
+                        </div>
+
+                        <nav>
+                            <ul id="listofplaylists" style="padding-left: 20px;">
+                            </ul>
+                        </nav>
+
+                        <b onclick="ManualRefresh()" style="cursor: pointer; font-size: 15px">Recreate Playlist</b>
+                    </span>
+                </div>
+            </div>
         </div>
-    </div>
-   
-  
-    
+
+        <script src="https://cdn.jsdelivr.net/npm/js-cookie@rc/dist/js.cookie.min.js"></script>
+        <script src="/static/VotingPage.js"></script>
+        <script src="/static/PlaylistSubmission.js"></script>
+
 </body>
-<script src="https://cdn.jsdelivr.net/npm/js-cookie@rc/dist/js.cookie.min.js"></script>
-<script src="/static/VotingPage.js"></script>
-<script src="/static/PlaylistSubmission.js"></script>    
-        
-    
 
 </html>
