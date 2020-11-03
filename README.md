@@ -1,4 +1,7 @@
 # SpotifyGroupPlaylist
+
+## Main Repo at https://github.com/HarrisonDuffield/SpotifyGroupPlaylist
+
 For When You Need to Vote on "Absolute Bangers"
 
   Rather than just sending a list of songs you like to your whatsapp group chat, and just having people say "yeah i like that " or "no , really?" and then when a song you all liked is agreed upon you have to find the song and add it to a shared list between you for it to inevitably fall through the cracks; why not have something which can do it for you?
