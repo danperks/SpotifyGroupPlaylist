@@ -1,5 +1,7 @@
-# SpotifyGroupPlaylist
+# Spotify Group Playlist
+By [@HarrisonDuffield](https://github.com/HarrisonDuffield) and [@DanPerks](https://github.com/danperks)
 
+## Project Demo: https://spotify-group-playlist.herokuapp.com/
 ## Main Repo at https://github.com/HarrisonDuffield/SpotifyGroupPlaylist
 
 For When You Need to Vote on "Absolute Bangers"
